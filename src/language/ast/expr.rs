@@ -6,7 +6,7 @@ pub mod uop;
 
 use std::fmt::{Display, Formatter};
 
-use super::super::tagged::TaggedBox;
+use super::super::tagged;
 pub use bop::Bop;
 pub use literal::Literal;
 pub use uop::Uop;
@@ -21,13 +21,13 @@ pub enum Expr<M, V> {
     /// Binary (infix) operation.
     Bop {
         op: Bop,
-        lhs: TaggedBox<M, Expr<M, V>>,
-        rhs: TaggedBox<M, Expr<M, V>>,
+        lhs: tagged::Box<M, Expr<M, V>>,
+        rhs: tagged::Box<M, Expr<M, V>>,
     },
     /// Unary (prefix or postfix) operation.
     Uop {
         op: Uop,
-        expr: TaggedBox<M, Expr<M, V>>,
+        expr: tagged::Box<M, Expr<M, V>>,
     },
 }
 

@@ -1,6 +1,7 @@
 //! Declarations in the Starling abstract syntax.
 
-use super::{call::Prototype, view, Statement};
+use super::{super::tagged::Tagged, call::Prototype, view, Statement};
+use crate::language::ast::StatementWithViews;
 
 /// A top-level declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -16,9 +17,18 @@ pub enum Decl<'inp, M, V> {
 #[non_exhaustive]
 pub struct Procedure<'inp, M, V> {
     /// The procedure prototype.
-    pub prototype: Prototype<'inp, M, V>,
-    /// The body, as a list of statements.
-    pub body: Vec<Statement>,
+    pub prototype: Tagged<M, Prototype<'inp, M, V>>,
+    /// The body, as a list of tagged statements.
+    pub body: Vec<Tagged<M, StatementWithViews<'inp, M, V>>>,
+}
+
+impl<'inp, M: Default, V> Default for Procedure<'inp, M, V> {
+    fn default() -> Self {
+        Self {
+            prototype: Tagged::default(),
+            body: vec![],
+        }
+    }
 }
 
 /// A declaration for one or more view atoms.

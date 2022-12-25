@@ -3,11 +3,9 @@
 use itertools::Itertools;
 use pest::{iterators::Pairs, Parser, Span};
 
-use super::language::{
-    ast::{Identifier, Program},
-    tagged::Spanned,
-};
+use super::language::{ast, tagged::Spanned};
 
+mod call;
 mod decl;
 mod utils;
 
@@ -16,8 +14,11 @@ mod utils;
 #[grammar = "parser/starling.pest"]
 struct StarlingParser;
 
+/// Type of program as parsed by the parser.
+pub type Program<'inp> = ast::Program<'inp, Option<Span<'inp>>, ast::Identifier<'inp>>;
+
 /// Parses a program.
-pub fn parse(input: &str) -> Result<Spanned<Program<Span, Identifier>>> {
+pub fn parse(input: &str) -> Result<Spanned<Program>> {
     let pairs = StarlingParser::parse(Rule::program, input).map_err(Box::new)?;
     let pair = pairs
         .exactly_one()
@@ -27,14 +28,16 @@ pub fn parse(input: &str) -> Result<Spanned<Program<Span, Identifier>>> {
 
     let program = program(pair.into_inner());
 
-    Ok(Spanned::new(span, program))
+    Ok(Spanned::new(Some(span), program))
 }
 
-fn program(body_pairs: Pairs<Rule>) -> Program<Span, Identifier> {
+fn program(body_pairs: Pairs<Rule>) -> Program {
     body_pairs.fold(Program::default(), |mut program, pair| {
         match pair.as_rule() {
-            Rule::identifier => program.name = Identifier::from(pair.as_str()),
-            Rule::decl => program.declarations.push(decl::spanned(pair)),
+            Rule::identifier => program.name = utils::spanned_id(pair),
+            Rule::decl => program
+                .declarations
+                .push(utils::lift_one(pair, decl::parse)),
             Rule::EOI => (),
             r => utils::unexpected_rule(r),
         };

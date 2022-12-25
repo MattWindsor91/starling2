@@ -10,18 +10,11 @@ use super::{
         ast::{constraint, decl, view, Call, Constraint, Decl, Expr, Identifier},
         tagged::Spanned,
     },
-    utils, Rule,
+    call, utils, Rule,
 };
 
-/// Parses a `declaration` rule as a spanned decl.
-pub fn spanned(pair: Pair<Rule>) -> Spanned<Decl<Span, Identifier>> {
-    assert!(matches!(pair.as_rule(), Rule::decl));
-
-    Spanned::new(pair.as_span(), parse(utils::one(pair.into_inner())))
-}
-
 /// Parses a pair as a decl.
-pub fn parse(pair: Pair<Rule>) -> Decl<Span, Identifier> {
+pub fn parse(pair: Pair<Rule>) -> Decl<Option<Span>, Identifier> {
     let rule = pair.as_rule();
     let inner = pair.into_inner();
     match rule {
@@ -32,7 +25,7 @@ pub fn parse(pair: Pair<Rule>) -> Decl<Span, Identifier> {
     }
 }
 
-fn constraint(pairs: Pairs<Rule>) -> Constraint<Span, Identifier> {
+fn constraint(pairs: Pairs<Rule>) -> Constraint<Option<Span>, Identifier> {
     let mut constr = Constraint {
         view: view::Pattern::default(),
         body: constraint::Body::Expr(constraint::Expr {
@@ -45,21 +38,25 @@ fn constraint(pairs: Pairs<Rule>) -> Constraint<Span, Identifier> {
     constr
 }
 
-fn procedure(pairs: Pairs<Rule>) -> decl::Procedure<Span, Identifier> {
-    let mut proc = decl::Procedure {
-        prototype: Call {
-            name: Identifier::default(),
-            args: vec![],
-        },
-        body: vec![],
-    };
-
-    // TODO
-
-    proc
+fn procedure(pairs: Pairs<Rule>) -> decl::Procedure<Option<Span>, Identifier> {
+    pairs.fold(decl::Procedure::default(), |mut proc, pair| {
+        match pair.as_rule() {
+            Rule::prototype => proc.prototype = utils::lift_many(pair, call::prototype),
+            Rule::statement_list => proc.body = statement_list(pair.into_inner()),
+            r => utils::unexpected_rule(r),
+        };
+        proc
+    })
 }
 
-fn view(pairs: Pairs<Rule>) -> decl::View<Span, Identifier> {
+fn statement_list(
+    pairs: Pairs<Rule>,
+) -> Vec<Spanned<super::ast::StatementWithViews<Option<Span>, Identifier>>> {
+    // TODO
+    vec![]
+}
+
+fn view(pairs: Pairs<Rule>) -> decl::View<Option<Span>, Identifier> {
     let mut view = decl::View { elements: vec![] };
 
     // TODO

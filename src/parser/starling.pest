@@ -15,6 +15,7 @@ program = {
 // Declarations
 //
 
+/// A top-level declaration.
 decl = {
     constraint_decl
     | procedure_decl
@@ -25,6 +26,7 @@ decl = {
 // Constraints
 //
 
+/// A constraint declaration.
 constraint_decl = {
     "constraint"
     ~ view_pattern
@@ -37,7 +39,7 @@ constraint_body = {
 }
 
 // A constraint body that maps a view pattern to a Boolean expression.
-expression_constraint_body = {
+expression_constraint_body = _{
     "entails" ~ expression
 }
 
@@ -51,17 +53,23 @@ view_pattern = {
 }
 
 view_atom_pattern = {
-    identifier ~ view_atom_argument_pattern_list?
+    identifier ~ view_argument_pattern_list? ~ iterator_pattern?
 }
 
-view_atom_argument_pattern_list = {
+/// A view argument pattern list.
+view_argument_pattern_list = _{
     "("
-    ~ view_atom_argument_pattern
-    ~ ("," ~ view_atom_argument_pattern)*
+    ~ view_argument_pattern
+    ~ ("," ~ view_argument_pattern)*
     ~ ")"
 }
 
-view_atom_argument_pattern = {
+/// A view iterator pattern.
+iterator_pattern = _{
+    "[" ~ view_argument_pattern ~ "]"
+}
+
+view_argument_pattern = _{
     wildcard
     | expression
 }
@@ -70,12 +78,21 @@ wildcard = { "_" }
 empty_view = { "emp" }
 
 //
-// View expressions
+// View assertions
 //
 
-view_expression = {
+view_assertion = {
     empty_view
-    | (call_expression ~ ("*" ~ call_expression)*)
+    | (view_atom_assertion ~ ("*" ~ view_atom_assertion)*)
+}
+
+view_atom_assertion = {
+    call_expression ~ view_iterator?
+}
+
+/// A view iterator (modelled as a subscript).
+view_iterator = {
+    subscript
 }
 
 //
@@ -158,9 +175,9 @@ array_type = {
 
 // Bounds for an array type.
 array_bound = {
-    int_lit
+    int_literal
     ~ ".."
-    ~ int_lit
+    ~ int_literal
 }
 
 primitive_type = {
@@ -174,12 +191,12 @@ primitive_type = {
 
 /// A semicolon-separated (Pascal-style) list of statements.
 statement_list = {
-    (statement_with_view ~ (";" ~ statement_with_view)*)?
+    (statement_with_views ~ (";" ~ statement_with_views)*)?
 }
 
 /// A statement that is optionally surrounded with view expressions.
-statement_with_view = {
-    view_expression? ~ statement ~ view_expression?
+statement_with_views = _{
+    view_assertion? ~ statement ~ view_assertion?
 }
 
 /// A statement.
@@ -251,15 +268,15 @@ argument_list = {
 
 // Any type of literal.
 literal =
-    { bool_lit
-    | int_lit
+    { bool_literal
+    | int_literal
     }
 
 // Boolean literal (case-insensitive true or false).
-bool_lit = { ^"true" | ^"false" }
+bool_literal = { ^"true" | ^"false" }
 
 // Integer literal (decimal number, possibly with a sign).
-int_lit = { sign? ~ ASCII_DIGIT+ }
+int_literal = { sign? ~ ASCII_DIGIT+ }
 
 // Sign (positive or negative).
 sign = { "+" | "-" }

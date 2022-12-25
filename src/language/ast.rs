@@ -27,7 +27,9 @@ pub mod view;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Program<'inp, M, V> {
-    pub name: Identifier<'inp>,
+    /// The name of the program.
+    pub name: Tagged<M, Identifier<'inp>>,
+    /// The declarations within the program.
     pub declarations: Vec<Tagged<M, Decl<'inp, M, V>>>,
 }
 
@@ -35,10 +37,10 @@ pub struct Program<'inp, M, V> {
 ///
 /// An empty name is not syntactically valid, but we assume that users of the default program will
 /// replace it.
-impl<'inp, M, V> Default for Program<'inp, M, V> {
+impl<'inp, M: Default, V> Default for Program<'inp, M, V> {
     fn default() -> Self {
         Self {
-            name: Identifier::default(),
+            name: Tagged::default(),
             declarations: vec![],
         }
     }
@@ -53,21 +55,21 @@ impl<'inp, M, V> Default for Program<'inp, M, V> {
 #[non_exhaustive]
 pub struct StatementWithViews<'inp, M, V> {
     pub pre: Option<view::Assertion<'inp, M, V>>,
-    pub stm: Statement,
+    pub stm: Tagged<M, Statement<M, V>>,
     pub post: Option<view::Assertion<'inp, M, V>>,
 }
 
 /// A statement.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub enum Statement {
-    Postfix(PostfixStatement),
+pub enum Statement<M, V> {
+    Postfix(PostfixStatement<M, V>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct PostfixStatement {
-    pub lvalue: Identifier<'static>,
+pub struct PostfixStatement<M, V> {
+    pub lvalue: Tagged<M, V>,
     pub op: PostfixStatementOp,
 }
 

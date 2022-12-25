@@ -9,10 +9,10 @@ use super::{super::Expr, call::Call};
 //
 
 /// A view pattern.
-pub type Pattern<'inp, M, V> = View<'inp, ArgumentPattern<M, V>>;
+pub type Pattern<'inp, M, V> = View<'inp, M, ArgumentPattern<M, V>>;
 
 /// A view atom pattern.
-pub type PatternAtom<'inp, M, V> = Atom<'inp, ArgumentPattern<M, V>>;
+pub type PatternAtom<'inp, M, V> = Atom<'inp, M, ArgumentPattern<M, V>>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
@@ -26,10 +26,10 @@ pub enum ArgumentPattern<M, V> {
 //
 
 /// A view assertion.
-pub type Assertion<'inp, M, V> = View<'inp, Expr<M, V>>;
+pub type Assertion<'inp, M, V> = View<'inp, M, Expr<M, V>>;
 
 /// A view assertion atom.
-pub type AssertionAtom<'inp, M, V> = Atom<'inp, Expr<M, V>>;
+pub type AssertionAtom<'inp, M, V> = Atom<'inp, M, Expr<M, V>>;
 
 //
 // Prototypes
@@ -45,17 +45,17 @@ pub type Prototype<'inp, M, V> = super::call::Prototype<'inp, M, V>;
 /// A generic view structure.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct View<'inp, T> {
+pub struct View<'inp, M, T> {
     /// The contents of the view.
-    pub contents: Vec<Atom<'inp, T>>,
+    pub contents: Vec<Atom<'inp, M, T>>,
 }
 
 /// The default view is the empty one.
-impl<'inp, T> Default for View<'inp, T> {
+impl<'inp, M, T> Default for View<'inp, M, T> {
     fn default() -> Self {
         Self { contents: vec![] }
     }
 }
 
 /// A generic view atom.
-pub type Atom<'inp, T> = Call<'inp, T>;
+pub type Atom<'inp, M, T> = Call<'inp, M, T>;
