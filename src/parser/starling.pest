@@ -2,23 +2,30 @@
 // Top-level
 //
 
-document = {
+program = {
     SOI
-    ~ (declaration ~ (";" ~ declaration)*)?
+    ~ "program" ~ identifier ~ ";"
+    ~ (decl ~ ";")*
+    ~ "begin"
+    ~ "end."
     ~ EOI
 }
 
-declaration = {
-    constraint_declaration
-    | procedure_declaration
-    | view_declaration
+//
+// Declarations
+//
+
+decl = {
+    constraint_decl
+    | procedure_decl
+    | view_decl
 }
 
 //
 // Constraints
 //
 
-constraint_declaration = {
+constraint_decl = {
     "constraint"
     ~ view_pattern
     ~ constraint_body
@@ -72,26 +79,26 @@ view_expression = {
 }
 
 //
-// View declarations
+// View decls
 //
 
-// A declaration for one or more view atoms.
-view_declaration = {
+// A decl for one or more view atoms.
+view_decl = {
     "view"
-    ~ view_declaration_list
+    ~ view_decl_list
 }
 
-// A list of view declaration elements.
-view_declaration_list = {
+// A list of view decl elements.
+view_decl_list = {
     prototype
     ~ ("," ~ prototype)*
 }
 
 //
-// Procedure declarations
+// Procedure decls
 //
 
-procedure_declaration = {
+procedure_decl = {
     "procedure"
     ~ prototype
     ~ ";"

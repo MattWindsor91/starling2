@@ -37,10 +37,10 @@ impl Display for Bop {
             Bop::Mul => "*",
             Bop::Div => "/",
             Bop::Mod => "%",
-            Bop::And => "&&",
-            Bop::Or => "||",
-            Bop::Impl => "=>",
-            Bop::Iff => "<=>",
+            Bop::And => "and",
+            Bop::Or => "or",
+            Bop::Impl => "implies",
+            Bop::Iff => "iff",
         })
     }
 }

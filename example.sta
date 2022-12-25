@@ -1,3 +1,5 @@
+program Arc;
+
 (* shared bool free;
 shared int count;
 
@@ -45,4 +47,7 @@ constraint iter[n] Arc ->
 
 constraint CountWas(c) entails c = 1 implies (free = false and count = 0);
 
-constraint CountWas(m) * CountWas(n) entails (m <> 1) or (n <> 1)
+constraint CountWas(m) * CountWas(n) entails (m <> 1) or (n <> 1);
+
+begin
+end.

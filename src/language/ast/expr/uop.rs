@@ -22,7 +22,7 @@ impl Display for Uop {
         f.write_str(match self {
             Self::Plus => "+",
             Self::Minus => "-",
-            Self::Not => "!",
+            Self::Not => "not",
         })
     }
 }

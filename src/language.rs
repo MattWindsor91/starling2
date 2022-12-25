@@ -1,6 +1,7 @@
 //! The high-level Starling language.
 
-pub mod expr;
+pub mod ast;
+pub mod tagged;
 mod typing;
 
-pub use expr::Expr;
+pub use ast::expr::Expr;
