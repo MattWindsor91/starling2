@@ -1,0 +1,271 @@
+//
+// Top-level
+//
+
+document = {
+    SOI
+    ~ (declaration ~ (";" ~ declaration)*)?
+    ~ EOI
+}
+
+declaration = {
+    constraint_declaration
+    | procedure_declaration
+    | view_declaration
+}
+
+//
+// Constraints
+//
+
+constraint_declaration = {
+    "constraint"
+    ~ view_pattern
+    ~ constraint_body
+}
+
+// The body of a constraint.
+constraint_body = {
+    expression_constraint_body
+}
+
+// A constraint body that maps a view pattern to a Boolean expression.
+expression_constraint_body = {
+    "entails" ~ expression
+}
+
+//
+// View patterns
+//
+
+view_pattern = {
+    empty_view
+    | (view_atom_pattern ~ ("*" ~ view_atom_pattern)*)
+}
+
+view_atom_pattern = {
+    identifier ~ view_atom_argument_pattern_list?
+}
+
+view_atom_argument_pattern_list = {
+    "("
+    ~ view_atom_argument_pattern
+    ~ ("," ~ view_atom_argument_pattern)*
+    ~ ")"
+}
+
+view_atom_argument_pattern = {
+    wildcard
+    | expression
+}
+
+wildcard = { "_" }
+empty_view = { "emp" }
+
+//
+// View expressions
+//
+
+view_expression = {
+    empty_view
+    | (call_expression ~ ("*" ~ call_expression)*)
+}
+
+//
+// View declarations
+//
+
+// A declaration for one or more view atoms.
+view_declaration = {
+    "view"
+    ~ view_declaration_list
+}
+
+// A list of view declaration elements.
+view_declaration_list = {
+    prototype
+    ~ ("," ~ prototype)*
+}
+
+//
+// Procedure declarations
+//
+
+procedure_declaration = {
+    "procedure"
+    ~ prototype
+    ~ ";"
+    ~ "begin"
+    ~ statement_list
+    ~ "end"
+}
+
+//
+// Function and view prototypes
+//
+
+prototype = {
+    identifier ~ parameter_list?
+}
+
+parameter_list = {
+    "("
+    ~ (parameter ~ ("," ~ parameter)*)?
+    ~ ")"
+}
+
+parameter = {
+    identifier ~ ":" ~ starling_type
+}
+
+//
+// Types
+//
+
+starling_type = {
+    primitive_type
+    | identifier
+    | refinement_type
+    | array_type
+}
+
+// A refinement type, of the form "{x : T | P(x)}".
+refinement_type = {
+    "{"
+    ~ identifier
+    ~ ":"
+    ~ starling_type
+    ~ "|"
+    ~ expression
+}
+
+// An array type.
+array_type = {
+    "array"
+    ~ "["
+    ~ array_bound
+    ~ "]"
+    ~ "of"
+    ~ starling_type
+}
+
+// Bounds for an array type.
+array_bound = {
+    int_lit
+    ~ ".."
+    ~ int_lit
+}
+
+primitive_type = {
+    "boolean"
+    | "integer"
+}
+
+//
+// Statements
+//
+
+/// A semicolon-separated (Pascal-style) list of statements.
+statement_list = {
+    (statement_with_view ~ (";" ~ statement_with_view)*)?
+}
+
+/// A statement that is optionally surrounded with view expressions.
+statement_with_view = {
+    view_expression? ~ statement ~ view_expression?
+}
+
+/// A statement.
+statement = {
+    postfix_statement
+}
+
+postfix_statement = _{
+    identifier ~ postfix_op
+}
+
+postfix_op = {
+    "++"
+    | "--"
+}
+
+//
+// Expressions (Pratt parsing)
+//
+
+/// Expressions.
+expression = !{ prefix* ~ primary~ postfix* ~ (infix ~ prefix* ~ primary~ postfix* )* }
+
+infix =  _{ arith_op | bool_op | rel_op }
+
+arith_op = _{ add | sub | mul | div | pow }
+add      =  { "+" }
+sub      =  { "-" }
+mul      =  { "*" }
+div      =  { "/" }
+pow      =  { "^" }
+
+bool_op  = _{ and | or | implies }
+and      =  { "and" }
+or       =  { "or" }
+implies  =  { "implies" }
+
+rel_op     = _{ not_eq | less_eq | greater_eq | less | greater | eq }
+less       =  { "<" }
+less_eq    =  { "<=" }
+eq         =  { "=" }
+not_eq     =  { "<>" }
+greater    =  { "<" }
+greater_eq =  { "<=" }
+
+prefix =  _{ neg | not }
+neg    =   { "-" }
+not    =   { "not" }
+
+postfix   =  _{ subscript }
+subscript =   { "[" ~ expression ~ "]" }
+
+primary  =  _{ literal | identifier | call_expression | "(" ~ expression ~ ")" }
+
+call_expression = {
+    identifier ~ argument_list?
+}
+
+argument_list = {
+    "("
+    ~ expression
+    ~ ("," ~ expression)*
+    ~ ")"
+}
+
+//
+// Literals
+//
+
+// Any type of literal.
+literal =
+    { bool_lit
+    | int_lit
+    }
+
+// Boolean literal (case-insensitive true or false).
+bool_lit = { ^"true" | ^"false" }
+
+// Integer literal (decimal number, possibly with a sign).
+int_lit = { sign? ~ ASCII_DIGIT+ }
+
+// Sign (positive or negative).
+sign = { "+" | "-" }
+
+// An identifier.
+identifier = @{ XID_START ~ (XID_CONTINUE)* }
+
+//
+// Trivia
+//
+
+// Whitespace is ASCII spaces, tabs, or newlines.
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+
+// Pascal-style comments.
+COMMENT = _{ "(*" ~ (!"*)" ~ ANY)* ~ "*)" }

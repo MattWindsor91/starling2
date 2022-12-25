@@ -1,0 +1,48 @@
+(* shared bool free;
+shared int count;
+
+thread bool f;
+thread int c; *)
+
+view Arc;
+view CountWas(c: integer);
+
+procedure Clone;
+begin
+  (* {| Arc |} <| count++; |> {| Arc * Arc |} *)
+end;
+
+procedure Print;
+begin
+    (*
+  {| Arc |}
+    <| f = free; |>
+  {| if f == true { false } else { Arc } |}
+    if f == true {
+      {| false |} <| error; |> {| false |}
+    }
+  {| Arc |}
+  *)
+end;
+
+procedure Drop;
+begin
+(*
+  {| Arc |}
+    <| c = count--; |>
+  {| CountWas(c) |}
+    if c == 1 {
+      {| CountWas(1) |} <| free = true; |> {| emp |}
+    }
+  {| emp |}
+*)
+end;
+
+(*
+constraint iter[n] Arc ->
+    n > 0 => (free == false && n <= count);
+*)
+
+constraint CountWas(c) entails c = 1 implies (free = false and count = 0);
+
+constraint CountWas(m) * CountWas(n) entails (m <> 1) or (n <> 1)
