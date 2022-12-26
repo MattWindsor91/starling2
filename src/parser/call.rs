@@ -1,15 +1,9 @@
 //! Parsers for call-related constructs.
 
-use pest::{
-    iterators::{Pair, Pairs},
-    Span,
-};
+use pest::{iterators::Pairs, Span};
 
 use super::{
-    super::language::{
-        ast::{call, constraint, decl, view, Call, Constraint, Decl, Expr, Identifier},
-        tagged::Spanned,
-    },
+    super::language::ast::{call, Identifier},
     utils, Rule,
 };
 

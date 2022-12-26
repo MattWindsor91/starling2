@@ -1,7 +1,6 @@
 //! Declarations in the Starling abstract syntax.
 
-use super::{super::tagged::Tagged, call::Prototype, view, Statement};
-use crate::language::ast::StatementWithViews;
+use super::{super::tagged::Tagged, call::Prototype, view, StatementWithViews};
 
 /// A top-level declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]
