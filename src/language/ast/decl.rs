@@ -6,7 +6,7 @@ use super::{super::tagged::Tagged, call::Prototype, view, StatementWithViews};
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum Decl<'inp, M, V> {
-    Constraint(super::Constraint<'inp, M, V>),
+    Constraint(super::constraint::Decl<'inp, M, V>),
     Procedure(Procedure<'inp, M, V>),
     View(View<'inp, M, V>),
 }

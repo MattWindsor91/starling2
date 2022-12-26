@@ -30,7 +30,7 @@ pub struct Program<'inp, M, V> {
     /// The name of the program.
     pub name: Tagged<M, Identifier<'inp>>,
     /// The declarations within the program.
-    pub declarations: Vec<Tagged<M, Decl<'inp, M, V>>>,
+    pub decls: Vec<Tagged<M, Decl<'inp, M, V>>>,
 }
 
 /// A default program has no declarations and a blank name.
@@ -41,7 +41,7 @@ impl<'inp, M: Default, V> Default for Program<'inp, M, V> {
     fn default() -> Self {
         Self {
             name: Tagged::default(),
-            declarations: vec![],
+            decls: vec![],
         }
     }
 }

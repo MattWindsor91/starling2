@@ -1,45 +1,46 @@
 //! Expressions in the high-level Starling language.
 
-pub mod bop;
-pub mod literal;
-pub mod uop;
-
 use std::fmt::{Display, Formatter};
 
-use super::super::tagged;
 pub use bop::Bop;
 pub use literal::Literal;
 pub use uop::Uop;
 
+use super::super::tagged::Tagged;
+
+pub mod bop;
+pub mod literal;
+pub mod uop;
+
 /// The body of an expression, parameterised over tags and variables.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Expr<M, V> {
+pub enum Expr<'inp, M, V> {
     /// Literal expression.
-    Literal(Literal),
+    Literal(Tagged<M, Literal<'inp>>),
     /// Variable reference.
-    Var(V),
+    Var(Tagged<M, V>),
     /// Binary (infix) operation.
     Bop {
         op: Bop,
-        lhs: tagged::Box<M, Expr<M, V>>,
-        rhs: tagged::Box<M, Expr<M, V>>,
+        lhs: Box<Expr<'inp, M, V>>,
+        rhs: Box<Expr<'inp, M, V>>,
     },
     /// Unary (prefix or postfix) operation.
     Uop {
         op: Uop,
-        expr: tagged::Box<M, Expr<M, V>>,
+        expr: Box<Expr<'inp, M, V>>,
     },
 }
 
-impl<T, V> Expr<T, V> {
+impl<'inp, M: Default, V> Expr<'inp, M, V> {
     /// Convenience constructor for a Boolean literal.
     #[must_use]
     pub fn bool(value: bool) -> Self {
-        Self::Literal(Literal::Bool(value))
+        Self::Literal(Tagged::with_default(Literal::Bool(value)))
     }
 }
 
-impl<T, V: Display> Display for Expr<T, V> {
+impl<'inp, M, V: Display> Display for Expr<'inp, M, V> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Literal(l) => l.fmt(f),
@@ -50,6 +51,3 @@ impl<T, V: Display> Display for Expr<T, V> {
         }
     }
 }
-
-/// An integer literal.
-pub type IntLit = i64;

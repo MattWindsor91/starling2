@@ -502,6 +502,7 @@ dependencies = [
  "color-eyre",
  "eyre",
  "itertools",
+ "once_cell",
  "pest",
  "pest_derive",
  "thiserror",

@@ -7,8 +7,8 @@ use super::super::typing;
 
 pub use super::super::typing::{Array, Prim};
 
-/// Refined types, parametrised over the inner type, expression tag, and variable encoding.
-pub type Refined<I, T, V> = typing::Refined<I, super::Expr<T, V>>;
+/// Refined types, parametrised over the inner type, expression metadata, and variable encoding.
+pub type Refined<'inp, I, M, V> = typing::Refined<I, super::Expr<'inp, M, V>>;
 
-/// Types with expression refinements, parametrised over the expression tag and variable encoding.
-pub type Type<T, V> = typing::Type<super::Expr<T, V>>;
+/// Types with expression refinements, parametrised over the expression metadata, and variable encoding.
+pub type Type<'inp, M, V> = typing::Type<super::Expr<'inp, M, V>>;

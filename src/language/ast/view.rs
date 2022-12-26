@@ -1,6 +1,9 @@
 //! Abstract syntax for views.
 
-use super::{super::Expr, call::Call};
+use super::{
+    super::{tagged::Tagged, Expr},
+    call::Call,
+};
 
 // TODO(@MattWindsor91): iterated views
 
@@ -9,16 +12,17 @@ use super::{super::Expr, call::Call};
 //
 
 /// A view pattern.
-pub type Pattern<'inp, M, V> = View<'inp, M, ArgumentPattern<M, V>>;
+pub type Pattern<'inp, M, V> = View<'inp, M, PatternArgument<'inp, M, V>>;
 
 /// A view atom pattern.
-pub type PatternAtom<'inp, M, V> = Atom<'inp, M, ArgumentPattern<M, V>>;
+pub type PatternAtom<'inp, M, V> = Atom<'inp, M, PatternArgument<'inp, M, V>>;
 
+/// A view argument pattern.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub enum ArgumentPattern<M, V> {
+pub enum PatternArgument<'inp, M, V> {
     Wildcard,
-    Expr(Expr<M, V>),
+    Expr(Expr<'inp, M, V>),
 }
 
 //
@@ -26,10 +30,10 @@ pub enum ArgumentPattern<M, V> {
 //
 
 /// A view assertion.
-pub type Assertion<'inp, M, V> = View<'inp, M, Expr<M, V>>;
+pub type Assertion<'inp, M, V> = View<'inp, M, Expr<'inp, M, V>>;
 
 /// A view assertion atom.
-pub type AssertionAtom<'inp, M, V> = Atom<'inp, M, Expr<M, V>>;
+pub type AssertionAtom<'inp, M, V> = Atom<'inp, M, Expr<'inp, M, V>>;
 
 //
 // Prototypes
@@ -47,7 +51,7 @@ pub type Prototype<'inp, M, V> = super::call::Prototype<'inp, M, V>;
 #[non_exhaustive]
 pub struct View<'inp, M, T> {
     /// The contents of the view.
-    pub contents: Vec<Atom<'inp, M, T>>,
+    pub contents: Vec<Tagged<M, Atom<'inp, M, T>>>,
 }
 
 /// The default view is the empty one.

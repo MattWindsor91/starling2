@@ -4,10 +4,10 @@
 
 program = {
     SOI
-    ~ "program" ~ identifier ~ ";"
+    ~ ^"program" ~ identifier ~ ";"
     ~ (decl ~ ";")*
-    ~ "begin"
-    ~ "end."
+    ~ ^"begin"
+    ~ ^"end."
     ~ EOI
 }
 
@@ -28,19 +28,19 @@ decl = {
 
 /// A constraint declaration.
 constraint_decl = {
-    "constraint"
-    ~ view_pattern
-    ~ constraint_body
+    ^"constraint"
+    ~ view_pattern ~ ("," ~ view_pattern)*
+    ~ constraint
 }
 
 // The body of a constraint.
-constraint_body = {
-    expression_constraint_body
+constraint = {
+    entails_constraint
 }
 
-// A constraint body that maps a view pattern to a Boolean expression.
-expression_constraint_body = _{
-    "entails" ~ expression
+// A constraint that maps a view pattern to a Boolean expression.
+entails_constraint = {
+    ^"entails" ~ expr
 }
 
 //
@@ -49,33 +49,33 @@ expression_constraint_body = _{
 
 view_pattern = {
     empty_view
-    | (view_atom_pattern ~ ("*" ~ view_atom_pattern)*)
+    | (view_pattern_atom ~ ("*" ~ view_pattern_atom)*)
 }
 
-view_atom_pattern = {
-    identifier ~ view_argument_pattern_list? ~ iterator_pattern?
+view_pattern_atom = {
+    identifier ~ view_pattern_argument_list? ~ iterator_pattern?
 }
 
 /// A view argument pattern list.
-view_argument_pattern_list = _{
+view_pattern_argument_list = {
     "("
-    ~ view_argument_pattern
-    ~ ("," ~ view_argument_pattern)*
+    ~ view_pattern_argument
+    ~ ("," ~ view_pattern_argument)*
     ~ ")"
 }
 
 /// A view iterator pattern.
-iterator_pattern = _{
-    "[" ~ view_argument_pattern ~ "]"
+iterator_pattern = {
+    "[" ~ view_pattern_argument ~ "]"
 }
 
-view_argument_pattern = _{
+view_pattern_argument = _{
     wildcard
-    | expression
+    | expr
 }
 
 wildcard = { "_" }
-empty_view = { "emp" }
+empty_view = { ^"emp" }
 
 //
 // View assertions
@@ -101,7 +101,7 @@ view_iterator = {
 
 // A decl for one or more view atoms.
 view_decl = {
-    "view"
+    ^"view"
     ~ view_decl_list
 }
 
@@ -160,7 +160,7 @@ refinement_type = {
     ~ ":"
     ~ starling_type
     ~ "|"
-    ~ expression
+    ~ expr
 }
 
 // An array type.
@@ -181,8 +181,8 @@ array_bound = {
 }
 
 primitive_type = {
-    "boolean"
-    | "integer"
+    ^"boolean"
+    | ^"integer"
 }
 
 //
@@ -218,21 +218,25 @@ postfix_op = {
 //
 
 /// Expressions.
-expression = !{ prefix* ~ primary~ postfix* ~ (infix ~ prefix* ~ primary~ postfix* )* }
+expr = !{ prefix* ~ primary~ postfix* ~ (infix ~ prefix* ~ primary~ postfix* )* }
+
+// The operators are broadly those allowed by
 
 infix =  _{ arith_op | bool_op | rel_op }
 
-arith_op = _{ add | sub | mul | div | pow }
+arith_op = _{ add | sub | mul | div | int_div | modulus }
 add      =  { "+" }
 sub      =  { "-" }
 mul      =  { "*" }
 div      =  { "/" }
-pow      =  { "^" }
+int_div  =  { ^"div" }
+modulus  =  { ^"mod" }
 
-bool_op  = _{ and | or | implies }
-and      =  { "and" }
-or       =  { "or" }
-implies  =  { "implies" }
+bool_op  = _{ and | or | implies | iff }
+and      =  { ^"and" }
+or       =  { ^"or" }
+implies  =  { ^"implies" }
+iff      =  { ^"iff" }
 
 rel_op     = _{ not_eq | less_eq | greater_eq | less | greater | eq }
 less       =  { "<" }
@@ -242,14 +246,15 @@ not_eq     =  { "<>" }
 greater    =  { "<" }
 greater_eq =  { "<=" }
 
-prefix =  _{ neg | not }
+prefix =  _{ pos | neg | not }
+pos    =   { "+" }
 neg    =   { "-" }
-not    =   { "not" }
+not    =   { ^"not" }
 
 postfix   =  _{ subscript }
-subscript =   { "[" ~ expression ~ "]" }
+subscript =   { "[" ~ expr ~ "]" }
 
-primary  =  _{ literal | identifier | call_expression | "(" ~ expression ~ ")" }
+primary  =  _{ literal | identifier | call_expression | "(" ~ expr ~ ")" }
 
 call_expression = {
     identifier ~ argument_list?
@@ -257,8 +262,8 @@ call_expression = {
 
 argument_list = {
     "("
-    ~ expression
-    ~ ("," ~ expression)*
+    ~ expr
+    ~ ("," ~ expr)*
     ~ ")"
 }
 
@@ -276,10 +281,7 @@ literal =
 bool_literal = { ^"true" | ^"false" }
 
 // Integer literal (decimal number, possibly with a sign).
-int_literal = { sign? ~ ASCII_DIGIT+ }
-
-// Sign (positive or negative).
-sign = { "+" | "-" }
+int_literal = @{ ASCII_DIGIT+ }
 
 // An identifier.
 identifier = @{ XID_START ~ (XID_CONTINUE)* }

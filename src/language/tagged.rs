@@ -5,7 +5,9 @@ use std::fmt::{Display, Formatter};
 /// A pair of AST node and its metadata.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Tagged<M, T> {
+    /// Metadata attached to the item.
     pub meta: M,
+    /// Item being tagged.
     pub item: T,
 }
 
@@ -14,6 +16,14 @@ impl<M, T> Tagged<M, T> {
     #[must_use]
     pub fn new(meta: M, item: T) -> Self {
         Self { meta, item }
+    }
+}
+
+impl<M: Default, T> Tagged<M, T> {
+    /// Constructs a new tagged node with default metadata.
+    #[must_use]
+    pub fn with_default(item: T) -> Self {
+        Self::new(M::default(), item)
     }
 }
 

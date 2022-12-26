@@ -6,8 +6,11 @@ use pest::{iterators::Pairs, Parser, Span};
 use super::language::{ast, tagged::Spanned};
 
 mod call;
+mod constraint;
 mod decl;
+mod expr;
 mod utils;
+mod view;
 
 /// The Starling parser.
 #[derive(pest_derive::Parser)]
@@ -31,17 +34,11 @@ pub fn parse(input: &str) -> Result<Spanned<Program>> {
     Ok(Spanned::new(Some(span), program))
 }
 
-fn program(body_pairs: Pairs<Rule>) -> Program {
-    body_pairs.fold(Program::default(), |mut program, pair| {
-        match pair.as_rule() {
-            Rule::identifier => program.name = utils::spanned_id(pair),
-            Rule::decl => program
-                .declarations
-                .push(utils::lift_one(pair, decl::parse)),
-            Rule::EOI => (),
-            r => utils::unexpected_rule(r),
-        };
-        program
+fn program(pairs: Pairs<Rule>) -> Program {
+    utils::match_rules!(pair in pairs, prog: Program {
+        identifier => prog.name = utils::spanned_id(pair),
+        decl => prog.decls.push(utils::lift_one(pair, decl::parse)),
+        EOI => ()
     })
 }
 
