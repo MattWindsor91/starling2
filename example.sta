@@ -18,7 +18,7 @@ procedure Print;
 begin
     (*
   {| Arc |}
-    <| f = free; |>
+    <| f := free; |>
   {| if f == true { false } else { Arc } |}
     if f == true {
       {| false |} <| error; |> {| false |}

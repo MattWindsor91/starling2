@@ -36,7 +36,7 @@ pub type Expr<'inp> = expr::Expr<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses an expression.
 ///
-/// The expression parser is a Pest-based Pratt parser, and so it takes a pairs iterator rather than
+/// The expression parser is a Pest-based Pratt parser, so it takes a pairs iterator rather than
 /// a single pair.
 #[must_use]
 pub fn parse(pairs: Pairs<Rule>) -> Expr {

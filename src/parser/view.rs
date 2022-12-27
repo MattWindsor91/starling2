@@ -30,7 +30,7 @@ pub fn assertion(pairs: Pairs<Rule>) -> Assertion {
 
 fn assertion_atom(pairs: Pairs<Rule>) -> AssertionAtom {
     utils::match_rules!(pair in pairs, asst: AssertionAtom {
-        call => asst.head = call::call(pair.into_inner())
+        call => asst.head = call::parse(pair.into_inner())
         // iterator
     })
 }

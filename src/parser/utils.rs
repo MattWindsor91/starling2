@@ -72,7 +72,17 @@ pub fn lift_one<'inp, T>(
     pair: Pair<'inp, super::Rule>,
     parser: fn(Pair<'inp, super::Rule>) -> T,
 ) -> Spanned<'inp, T> {
-    spanned(pair.as_span(), parser(one(pair.into_inner())))
+    spanned(pair.as_span(), parser(one_inner(pair)))
+}
+
+/// Enforces that exactly one pair exists in the inner pairs of `pair`, and extracts it.
+///
+/// # Panics
+///
+/// Panics if there is more or less than one pair in `pair.into_inner()`.
+#[must_use]
+pub fn one_inner(pair: Pair<super::Rule>) -> Pair<super::Rule> {
+    one(pair.into_inner())
 }
 
 /// Enforces that exactly one pair exists in `pairs`, and extracts it.

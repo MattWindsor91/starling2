@@ -37,7 +37,7 @@ pub type ArgumentList<'inp> = Vec<Spanned<'inp, expr::Expr<'inp>>>;
 
 /// Parses a call.
 #[must_use]
-pub fn call(pairs: Pairs<Rule>) -> Call {
+pub fn parse(pairs: Pairs<Rule>) -> Call {
     utils::match_rules!(pair in pairs, call: Call {
         identifier => call.name = utils::spanned_id(pair),
         argument_list => call.args = argument_list(pair.into_inner())

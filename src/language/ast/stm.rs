@@ -40,8 +40,8 @@ pub enum Stm<'inp, M, V> {
     /// A call statement.
     ///
     /// The semantics of a call statement is an assert-assume: we assert that we satisfy the
-    /// precondition of the procedure, and assume the postcondition of the procedure.
-    Call(call::Generic<'inp, M, V>),
+    /// pre-condition of the procedure, and assume the post-condition of the procedure.
+    Call(call::Call<'inp, M, V>),
     /// A no-operation statement.
     #[default]
     Nop,

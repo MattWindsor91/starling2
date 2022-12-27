@@ -31,7 +31,7 @@ pub fn decl(pairs: Pairs<Rule>) -> Decl {
 /// Parses a constraint body from a pair.
 fn parse(pair: Pair<Rule>) -> Constraint {
     match pair.as_rule() {
-        Rule::entails_constraint => Constraint::Entails(entailment(utils::one(pair.into_inner()))),
+        Rule::entails_constraint => Constraint::Entails(entailment(utils::one_inner(pair))),
         r => utils::unexpected_rule(r),
     }
 }

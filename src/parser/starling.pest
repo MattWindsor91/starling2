@@ -2,6 +2,7 @@
 // Top-level
 //
 
+/// A program.
 program = {
     SOI
     ~ ^"program" ~ identifier ~ ";"
@@ -10,6 +11,7 @@ program = {
     ~ ^"end."
     ~ EOI
 }
+
 
 //
 // Declarations
@@ -21,6 +23,7 @@ decl = {
     | procedure_decl
     | view_decl
 }
+
 
 //
 // Constraints
@@ -42,6 +45,7 @@ constraint = {
 entails_constraint = {
     ^"entails" ~ expr
 }
+
 
 //
 // View patterns
@@ -77,6 +81,7 @@ view_pattern_argument = _{
 wildcard = { "_" }
 empty_view = { ^"emp" }
 
+
 //
 // View assertions
 //
@@ -99,6 +104,7 @@ view_iterator = {
     subscript
 }
 
+
 //
 // View decls
 //
@@ -115,6 +121,7 @@ view_decl_list = {
     ~ ("," ~ prototype)*
 }
 
+
 //
 // Procedure decls
 //
@@ -127,6 +134,7 @@ procedure_decl = {
     ~ stm_list
     ~ "end"
 }
+
 
 //
 // Function and view prototypes
@@ -145,6 +153,7 @@ parameter_list = {
 parameter = {
     identifier ~ ":" ~ starling_type
 }
+
 
 //
 // Types
@@ -189,6 +198,7 @@ primitive_type = {
     | ^"integer"
 }
 
+
 //
 // Statements
 //
@@ -213,8 +223,13 @@ stm = {
 nop_stm = { ^"nop" }
 
 /// A list of statements to be treated atomically.
+///
+/// There are two forms of atomic statement syntax: one that uses keywords in
+/// the typical Pascal style, and another that uses angle brackets in an
+/// approximation of typical proof script style.
 atomic_stm = {
-    "<|" ~ stm_list ~ "|>"
+    ("<|" ~ stm_list ~ "|>")
+    | (^"atomic" ~ stm_list ~ ^"end")
 }
 
 
@@ -225,7 +240,8 @@ atomic_stm = {
 /// Expressions.
 expr = !{ prefix* ~ primary~ postfix* ~ (infix ~ prefix* ~ primary~ postfix* )* }
 
-// The operators are broadly those allowed by
+// The operators are broadly those allowed by Pascal, with some extensions to
+// make specifying constraints easier.
 
 infix =  _{ arith_op | bool_op | rel_op }
 
@@ -278,6 +294,7 @@ argument_list = {
     ~ ")"
 }
 
+
 //
 // Literals
 //
@@ -302,6 +319,7 @@ keyword = _{
     ^"begin" |
     ^"end"
 }
+
 
 //
 // Trivia
