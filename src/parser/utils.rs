@@ -6,7 +6,7 @@ use pest::{
     Span,
 };
 
-use super::Spanned;
+use super::{super::language::tagged::Spanned, Rule};
 
 /// Repeatedly matches rules in a pairs iterator against a list of patterns, using them to populate
 /// an initially-default syntactic construct; finally returns that construct.
@@ -39,6 +39,10 @@ macro_rules! match_rule {
 }
 pub(crate) use match_rule;
 
+//
+// Spans
+//
+
 /// Wraps an item in a span.
 #[must_use]
 pub fn spanned<T>(span: Span, item: T) -> Spanned<T> {
@@ -47,9 +51,13 @@ pub fn spanned<T>(span: Span, item: T) -> Spanned<T> {
 
 /// Creates a spanned identifier from its pair.
 #[must_use]
-pub fn spanned_id(pair: Pair<super::Rule>) -> Spanned<super::ast::Identifier> {
+pub fn spanned_id(pair: Pair<Rule>) -> Spanned<super::ast::Identifier> {
     spanned(pair.as_span(), super::ast::Identifier::from(pair.as_str()))
 }
+
+//
+// Lifting parsers
+//
 
 /// Wraps a parser that consumes all of the inner pairs of `pair`.
 ///
@@ -57,8 +65,8 @@ pub fn spanned_id(pair: Pair<super::Rule>) -> Spanned<super::ast::Identifier> {
 /// that span.
 #[must_use]
 pub fn lift_many<'inp, T>(
-    pair: Pair<'inp, super::Rule>,
-    parser: fn(Pairs<'inp, super::Rule>) -> T,
+    pair: Pair<'inp, Rule>,
+    parser: fn(Pairs<'inp, Rule>) -> T,
 ) -> Spanned<'inp, T> {
     spanned(pair.as_span(), parser(pair.into_inner()))
 }
@@ -69,11 +77,15 @@ pub fn lift_many<'inp, T>(
 /// that span.
 #[must_use]
 pub fn lift_one<'inp, T>(
-    pair: Pair<'inp, super::Rule>,
-    parser: fn(Pair<'inp, super::Rule>) -> T,
+    pair: Pair<'inp, Rule>,
+    parser: fn(Pair<'inp, Rule>) -> T,
 ) -> Spanned<'inp, T> {
     spanned(pair.as_span(), parser(one_inner(pair)))
 }
+
+//
+// There can be only one
+//
 
 /// Enforces that exactly one pair exists in the inner pairs of `pair`, and extracts it.
 ///
@@ -81,7 +93,7 @@ pub fn lift_one<'inp, T>(
 ///
 /// Panics if there is more or less than one pair in `pair.into_inner()`.
 #[must_use]
-pub fn one_inner(pair: Pair<super::Rule>) -> Pair<super::Rule> {
+pub fn one_inner(pair: Pair<Rule>) -> Pair<Rule> {
     one(pair.into_inner())
 }
 
@@ -91,11 +103,15 @@ pub fn one_inner(pair: Pair<super::Rule>) -> Pair<super::Rule> {
 ///
 /// Panics if there is more or less than one pair in `pairs`.
 #[must_use]
-pub fn one(pairs: Pairs<super::Rule>) -> Pair<super::Rule> {
+pub fn one(pairs: Pairs<Rule>) -> Pair<Rule> {
     pairs
         .exactly_one()
         .expect("expected exactly one match here")
 }
+
+//
+// Error conditions
+//
 
 /// Panics with an unexpected rule.
 ///
@@ -103,6 +119,16 @@ pub fn one(pairs: Pairs<super::Rule>) -> Pair<super::Rule> {
 ///
 /// Always.
 #[inline]
-pub fn unexpected_rule(rule: super::Rule) -> ! {
+pub fn unexpected_rule(rule: Rule) -> ! {
     unreachable!("parser should not have accepted {:?} here", rule)
+}
+
+//
+// Pratt parsing
+//
+
+/// Shorthand for a left-infix rule.
+#[must_use]
+pub fn l_infix(rule: Rule) -> pest::pratt_parser::Op<Rule> {
+    pest::pratt_parser::Op::infix(rule, pest::pratt_parser::Assoc::Left)
 }

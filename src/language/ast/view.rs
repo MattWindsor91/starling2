@@ -1,11 +1,13 @@
 //! Abstract syntax for views.
 
+pub use assertion::Assertion;
+
 use super::{
     super::{tagged::Tagged, Expr},
     call::Generic,
 };
 
-// TODO(@MattWindsor91): iterated views
+pub mod assertion;
 
 //
 // Patterns
@@ -21,19 +23,16 @@ pub type PatternAtom<'inp, M, V> = Atom<'inp, M, PatternArgument<'inp, M, V>>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum PatternArgument<'inp, M, V> {
+    /// A `_` argument.
     Wildcard,
+    /// An expression used as a pattern.
     Expr(Expr<'inp, M, V>),
 }
 
 //
 // Assertions
 //
-
-/// A view assertion.
-pub type Assertion<'inp, M, V> = View<'inp, M, Expr<'inp, M, V>>;
-
-/// A view assertion atom.
-pub type AssertionAtom<'inp, M, V> = Atom<'inp, M, Expr<'inp, M, V>>;
+/// An if-then-else view assertion.
 
 //
 // Prototypes

@@ -70,7 +70,7 @@ view_pattern_argument_list = {
 
 /// A view iterator pattern.
 iterator_pattern = {
-    "[" ~ view_pattern_argument ~ "]"
+    "^" ~ view_pattern_argument
 }
 
 view_pattern_argument = _{
@@ -83,18 +83,39 @@ empty_view = { ^"emp" }
 
 
 //
-// View assertions
+// View assertions (Pratt parsing)
 //
 
 view_assertion = {
-    "{" ~ view_assertion_inner ~ "}"
+    "{" ~ view_assertion_body ~ "}"
 }
 
-view_assertion_inner = _{
-    empty_view
-    | (view_assertion_atom ~ ("*" ~ view_assertion_atom)*)
+/// A Pratt-parsed view assertion body.
+view_assertion_body = !{
+    view_prefix* ~ view_primary~ view_postfix* ~ (view_infix ~ view_prefix* ~ view_primary~ view_postfix* )*
 }
 
+view_prefix = _{
+    view_guard
+}
+view_guard = { "[" ~ expr ~ "]" }
+
+view_infix = _{
+    view_join
+    | view_ite
+}
+view_join = { "*" }
+view_ite  = { "<[" ~ expr ~ "]>" }
+
+view_postfix = _{
+    view_iterate
+}
+view_iterate = { "^" ~ expr }
+
+view_primary = _{
+    "(" ~ view_assertion_body ~ ")"
+    | view_assertion_atom
+}
 view_assertion_atom = {
     call ~ view_iterator?
 }

@@ -16,8 +16,10 @@ end;
 
 procedure Print;
 begin
-    (*
-  {| Arc |}
+  { Arc }
+    nop
+  { Arc }
+  (*
     <| f := free; |>
   {| if f == true { false } else { Arc } |}
     if f == true {

@@ -31,18 +31,25 @@ pub fn list(pairs: Pairs<Rule>) -> List {
 #[must_use]
 pub fn triple(pairs: Pairs<Rule>) -> Triple {
     utils::match_rules!(pair in pairs, triple: Triple {
-        view_assertion => {
-            let asst = utils::lift_many(pair, super::view::assertion);
-            if triple.pre.is_none() {
-                triple.pre = Some(asst)
-            } else if triple.post.is_none() {
-                triple.post = Some(asst)
-            } else {
-                unreachable!("should be only two views in a triple");
-            }
-        },
+        view_assertion => triple_view(&mut triple, pair),
         stm => triple.stm = utils::lift_one(pair, parse)
     })
+}
+
+/// Places the assertion parsed from `pair` in the first slot in `triple` that is available.
+///
+/// # Panics
+///
+/// Panics if this is the third assertion we have parsed for `triple` (there should be only two).
+fn triple_view<'i>(triple: &mut Triple<'i>, pair: Pair<'i, Rule>) {
+    let asst = utils::lift_one(pair, super::view::assertion::parse);
+    if triple.pre.is_none() {
+        triple.pre = Some(asst)
+    } else if triple.post.is_none() {
+        triple.post = Some(asst)
+    } else {
+        unreachable!("should be only two views in a triple");
+    }
 }
 
 /// Parses `pair` as a statement.

@@ -1,5 +1,7 @@
 //! Parser for views and view atoms.
 
+pub mod assertion;
+
 use pest::{iterators::Pairs, Span};
 
 use super::{
@@ -9,31 +11,6 @@ use super::{
     },
     call, utils, Rule,
 };
-
-//
-// Assertions
-//
-
-/// Shorthand for the type of pattern produced by the parser.
-pub type Assertion<'inp> = view::Assertion<'inp, Option<Span<'inp>>, Identifier<'inp>>;
-
-/// Shorthand for the type of pattern atom produced by the parser.
-pub type AssertionAtom<'inp> = view::AssertionAtom<'inp, Option<Span<'inp>>, Identifier<'inp>>;
-
-/// Parses a view assertion given the `pairs` over its contents.
-#[must_use]
-pub fn assertion(pairs: Pairs<Rule>) -> Assertion {
-    utils::match_rules!(pair in pairs, pat: Assertion {
-        view_assertion_atom => pat.contents.push(utils::lift_many(pair, assertion_atom))
-    })
-}
-
-fn assertion_atom(pairs: Pairs<Rule>) -> AssertionAtom {
-    utils::match_rules!(pair in pairs, asst: AssertionAtom {
-        call => asst.head = call::parse(pair.into_inner())
-        // iterator
-    })
-}
 
 //
 // Patterns

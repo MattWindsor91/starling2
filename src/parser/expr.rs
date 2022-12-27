@@ -9,7 +9,8 @@ use pest::{
 
 use super::{
     super::language::ast::{expr, Identifier},
-    utils, Rule,
+    utils::{self, l_infix},
+    Rule,
 };
 
 static PARSER: OnceCell<PrattParser<Rule>> = OnceCell::new();
@@ -94,18 +95,6 @@ fn infix_op(pair: Pair<Rule>) -> expr::Bop {
         greater_eq => Rel(GreaterEq)
     })
 }
-
-fn l_infix(rule: Rule) -> Op<Rule> {
-    Op::infix(rule, Assoc::Left)
-}
-
-/*
-or else, and then, Lowest
-=, <>, <, <=, >, >=, in
-|, !, +, -, or,
-*, /, div, mod, and, &
-~, not,	Highest
-*/
 
 /// Parses a literal expression.
 fn literal(pair: Pair<Rule>) -> Expr {

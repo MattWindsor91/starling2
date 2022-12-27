@@ -1,6 +1,7 @@
 //! Statements.
 
 use super::{super::tagged::Tagged, call, view};
+use crate::language::ast::view::assertion;
 
 /// A list of statement triples.
 pub type List<'inp, M, V> = Vec<Tagged<M, Triple<'inp, M, V>>>;
@@ -9,11 +10,11 @@ pub type List<'inp, M, V> = Vec<Tagged<M, Triple<'inp, M, V>>>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Triple<'inp, M, V> {
     /// The precondition.
-    pub pre: Option<Tagged<M, view::Assertion<'inp, M, V>>>,
+    pub pre: Option<Tagged<M, assertion::Assertion<'inp, M, V>>>,
     /// The statement.
     pub stm: Tagged<M, Stm<'inp, M, V>>,
     /// The postcondition.
-    pub post: Option<Tagged<M, view::Assertion<'inp, M, V>>>,
+    pub post: Option<Tagged<M, assertion::Assertion<'inp, M, V>>>,
 }
 
 /// The default triple is a no-op with no pre- or post-condition.
