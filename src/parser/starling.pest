@@ -70,7 +70,7 @@ view_pattern_argument_list = {
 
 /// A view iterator pattern.
 iterator_pattern = {
-    "^" ~ view_pattern_argument
+    "[" ~ view_pattern_argument ~ "]"
 }
 
 view_pattern_argument = _{
@@ -110,21 +110,12 @@ view_ite  = { "<[" ~ expr ~ "]>" }
 view_postfix = _{
     view_iterate
 }
-view_iterate = { "^" ~ expr }
+view_iterate = { "[" ~ expr ~ "]" }
 
 view_primary = _{
     "(" ~ view_assertion_body ~ ")"
-    | view_assertion_atom
+    | call // view assertion atom
 }
-view_assertion_atom = {
-    call ~ view_iterator?
-}
-
-/// A view iterator (modelled as a subscript).
-view_iterator = {
-    subscript
-}
-
 
 //
 // View decls

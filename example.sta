@@ -11,7 +11,7 @@ view CountWas(c: integer);
 
 procedure Clone;
 begin
-  { Arc } <| Inc(count) |> { Arc * Arc }
+  { Arc } <| Inc(count) |> { Arc[2] }
 end;
 
 procedure Print;

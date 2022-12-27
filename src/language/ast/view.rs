@@ -4,7 +4,7 @@ pub use assertion::Assertion;
 
 use super::{
     super::{tagged::Tagged, Expr},
-    call::Generic,
+    call,
 };
 
 pub mod assertion;
@@ -17,7 +17,7 @@ pub mod assertion;
 pub type Pattern<'inp, M, V> = View<'inp, M, PatternArgument<'inp, M, V>>;
 
 /// A view atom pattern.
-pub type PatternAtom<'inp, M, V> = Atom<'inp, M, PatternArgument<'inp, M, V>>;
+pub type PatternAtom<'inp, M, V> = call::Generic<'inp, M, PatternArgument<'inp, M, V>>;
 
 /// A view argument pattern.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -39,18 +39,18 @@ pub enum PatternArgument<'inp, M, V> {
 //
 
 /// A view prototype.
-pub type Prototype<'inp, M, V> = super::call::Prototype<'inp, M, V>;
+pub type Prototype<'inp, M, V> = call::Prototype<'inp, M, V>;
 
 //
 // General structure
 //
 
-/// A generic view structure.
+/// A generic flat view structure.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct View<'inp, M, T> {
     /// The contents of the view.
-    pub contents: Vec<Tagged<M, Atom<'inp, M, T>>>,
+    pub contents: Vec<Tagged<M, call::Generic<'inp, M, T>>>,
 }
 
 /// The default view is the empty one.
@@ -60,20 +60,11 @@ impl<'inp, M, T> Default for View<'inp, M, T> {
     }
 }
 
-/// A generic view atom.
+/// Wraps an item (view or atom) with an iterator.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Atom<'inp, M, T> {
-    /// The main part of the atom.
-    pub head: Generic<'inp, M, T>,
-    pub iterator: Option<Tagged<M, Expr<'inp, M, T>>>,
-}
-
-/// The default atom has a default head and empty iterator.
-impl<'inp, M: Default, T> Default for Atom<'inp, M, T> {
-    fn default() -> Self {
-        Self {
-            head: Generic::default(),
-            iterator: None,
-        }
-    }
+pub struct Iterated<'inp, M, V, T> {
+    /// The iterated item.
+    pub item: T,
+    /// The iterator.
+    pub iterator: Tagged<M, Expr<'inp, M, V>>,
 }

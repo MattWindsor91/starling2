@@ -2,15 +2,28 @@
 
 pub mod assertion;
 
-use pest::{iterators::Pairs, Span};
+use pest::{
+    iterators::{Pair, Pairs},
+    Span,
+};
 
 use super::{
     super::language::{
         ast::{view, Identifier},
         tagged::Spanned,
     },
-    call, utils, Rule,
+    expr, utils, Rule,
 };
+
+/// Shorthand for the type of iterated views/atoms parsed by `iterate`.
+pub type Iterated<'inp, T> = view::Iterated<'inp, Option<Span<'inp>>, Identifier<'inp>, T>;
+
+/// Parses a view iterator from `rule`, wrapping `item` within it.
+pub fn iterate<T>(rule: Pair<Rule>, item: T) -> Iterated<T> {
+    utils::match_rule!(rule {
+        expr => Iterated{item, iterator: utils::lift_many(rule, expr::parse)}
+    })
+}
 
 //
 // Patterns
@@ -35,8 +48,8 @@ pub fn pattern(pairs: Pairs<Rule>) -> Pattern {
 
 fn pattern_atom(pairs: Pairs<Rule>) -> PatternAtom {
     utils::match_rules!(pair in pairs, pat: PatternAtom {
-        identifier => pat.head.name = utils::spanned_id(pair),
-        view_pattern_argument_list => pat.head.args = pattern_arguments(pair.into_inner())
+        identifier => pat.name = utils::spanned_id(pair),
+        view_pattern_argument_list => pat.args = pattern_arguments(pair.into_inner())
     })
 }
 
@@ -47,5 +60,5 @@ fn pattern_arguments(pairs: Pairs<Rule>) -> Vec<Spanned<PatternArgument>> {
 }
 
 fn pattern_expr_argument(pairs: Pairs<Rule>) -> PatternArgument {
-    PatternArgument::Expr(super::expr::parse(pairs))
+    PatternArgument::Expr(expr::parse(pairs))
 }
