@@ -82,12 +82,16 @@ empty_view = { ^"emp" }
 //
 
 view_assertion = {
-    empty_view
-    | (view_atom_assertion ~ ("*" ~ view_atom_assertion)*)
+    "{" ~ view_assertion_inner ~ "}"
 }
 
-view_atom_assertion = {
-    call_expression ~ view_iterator?
+view_assertion_inner = _{
+    empty_view
+    | (view_assertion_atom ~ ("*" ~ view_assertion_atom)*)
+}
+
+view_assertion_atom = {
+    call ~ view_iterator?
 }
 
 /// A view iterator (modelled as a subscript).
@@ -120,7 +124,7 @@ procedure_decl = {
     ~ prototype
     ~ ";"
     ~ "begin"
-    ~ statement_list
+    ~ stm_list
     ~ "end"
 }
 
@@ -190,28 +194,29 @@ primitive_type = {
 //
 
 /// A semicolon-separated (Pascal-style) list of statements.
-statement_list = {
-    (statement_with_views ~ (";" ~ statement_with_views)*)?
+stm_list = {
+    (stm_triple ~ (";" ~ stm_triple)*)?
 }
 
 /// A statement that is optionally surrounded with view expressions.
-statement_with_views = _{
-    view_assertion? ~ statement ~ view_assertion?
+stm_triple = {
+    view_assertion? ~ stm ~ view_assertion?
 }
 
 /// A statement.
-statement = {
-    postfix_statement
+stm = {
+      atomic_stm // Atomic statement
+    | call       // Procedure call
+    | nop_stm
 }
 
-postfix_statement = _{
-    identifier ~ postfix_op
+nop_stm = { ^"nop" }
+
+/// A list of statements to be treated atomically.
+atomic_stm = {
+    "<|" ~ stm_list ~ "|>"
 }
 
-postfix_op = {
-    "++"
-    | "--"
-}
 
 //
 // Expressions (Pratt parsing)
@@ -251,12 +256,18 @@ pos    =   { "+" }
 neg    =   { "-" }
 not    =   { ^"not" }
 
-postfix   =  _{ subscript }
+/// A postfix operator.
+///
+/// Note that function calls and subscripts are both considered postfix
+/// operators; this differs from how we parse procedure calls in
+/// statements.
+postfix   =  _{ argument_list | subscript }
 subscript =   { "[" ~ expr ~ "]" }
 
-primary  =  _{ literal | identifier | call_expression | "(" ~ expr ~ ")" }
+primary  =  _{ literal | identifier | "(" ~ expr ~ ")" }
 
-call_expression = {
+/// A procedure call (or similar syntactic element).
+call = {
     identifier ~ argument_list?
 }
 
@@ -284,7 +295,13 @@ bool_literal = { ^"true" | ^"false" }
 int_literal = @{ ASCII_DIGIT+ }
 
 // An identifier.
-identifier = @{ XID_START ~ (XID_CONTINUE)* }
+identifier = @{ (!keyword) ~ XID_START ~ (XID_CONTINUE)* }
+
+// A global keyword, forbidden as an identifier.
+keyword = _{
+    ^"begin" |
+    ^"end"
+}
 
 //
 // Trivia

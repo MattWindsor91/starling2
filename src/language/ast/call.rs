@@ -5,7 +5,7 @@ use super::{super::tagged::Tagged, typing::Type, Identifier};
 /// Generalised type of anything shaped like a procedure call, including view atoms.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct Call<'inp, M, Arg> {
+pub struct Generic<'inp, M, Arg> {
     pub name: Tagged<M, Identifier<'inp>>,
     pub args: Vec<Tagged<M, Arg>>,
 }
@@ -14,7 +14,7 @@ pub struct Call<'inp, M, Arg> {
 ///
 /// An empty name is syntactically invalid, but we assume it will be replaced with something
 /// non-empty if we are emitting syntax.
-impl<'inp, M: Default, Arg> Default for Call<'inp, M, Arg> {
+impl<'inp, M: Default, Arg> Default for Generic<'inp, M, Arg> {
     fn default() -> Self {
         Self {
             name: Tagged::default(),
@@ -23,8 +23,11 @@ impl<'inp, M: Default, Arg> Default for Call<'inp, M, Arg> {
     }
 }
 
+/// Type of procedure calls (and non-iterated view atoms).
+pub type Call<'inp, M, V> = Generic<'inp, M, super::expr::Expr<'inp, M, V>>;
+
 /// Type of procedure (and non-iterated view atom) prototypes.
-pub type Prototype<'inp, M, V> = Call<'inp, M, Parameter<'inp, M, V>>;
+pub type Prototype<'inp, M, V> = Generic<'inp, M, Parameter<'inp, M, V>>;
 
 /// A formal parameter.
 #[derive(Clone, Debug, PartialEq, Eq)]

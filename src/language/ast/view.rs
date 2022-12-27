@@ -2,7 +2,7 @@
 
 use super::{
     super::{tagged::Tagged, Expr},
-    call::Call,
+    call::Generic,
 };
 
 // TODO(@MattWindsor91): iterated views
@@ -62,4 +62,19 @@ impl<'inp, M, T> Default for View<'inp, M, T> {
 }
 
 /// A generic view atom.
-pub type Atom<'inp, M, T> = Call<'inp, M, T>;
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Atom<'inp, M, T> {
+    /// The main part of the atom.
+    pub head: Generic<'inp, M, T>,
+    pub iterator: Option<Tagged<M, Expr<'inp, M, T>>>,
+}
+
+/// The default atom has a default head and empty iterator.
+impl<'inp, M: Default, T> Default for Atom<'inp, M, T> {
+    fn default() -> Self {
+        Self {
+            head: Generic::default(),
+            iterator: None,
+        }
+    }
+}

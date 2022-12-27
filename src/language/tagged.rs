@@ -34,11 +34,5 @@ impl<M, T: Display> Display for Tagged<M, T> {
     }
 }
 
-/// An AST node boxed and tagged with metadata.
-pub type Box<M, T> = Tagged<M, std::boxed::Box<T>>;
-
 /// An AST node tagged with an optional Pest span.
 pub type Spanned<'inp, T> = Tagged<Option<pest::Span<'inp>>, T>;
-
-/// An AST node boxed and tagged with a Pest span.
-pub type SpannedBox<'inp, T> = Spanned<'inp, std::boxed::Box<T>>;

@@ -41,7 +41,7 @@ pub(crate) use match_rule;
 
 /// Wraps an item in a span.
 #[must_use]
-pub fn spanned<'inp, T>(span: Span<'inp>, item: T) -> Spanned<'inp, T> {
+pub fn spanned<T>(span: Span, item: T) -> Spanned<T> {
     Spanned::new(Some(span), item)
 }
 

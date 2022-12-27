@@ -6,41 +6,31 @@ use pest::{
 };
 
 use super::{
-    super::language::{
-        ast::{decl, view, Call, Decl, Expr, Identifier},
-        tagged::Spanned,
-    },
-    call, constraint, utils, Rule,
+    super::language::ast::{decl, Identifier},
+    call, constraint, stm, utils, Rule,
 };
 
-/// Parses a pair as a decl.
-pub fn parse(pair: Pair<Rule>) -> Decl<Option<Span>, Identifier> {
-    let rule = pair.as_rule();
-    let inner = pair.into_inner();
-    match rule {
-        Rule::constraint_decl => Decl::Constraint(constraint::decl(inner)),
-        Rule::procedure_decl => Decl::Procedure(procedure(inner)),
-        Rule::view_decl => Decl::View(view(inner)),
-        r => utils::unexpected_rule(r),
-    }
-}
+/// Shorthand for the type of declarations returned by this parser.
+pub type Decl<'inp> = decl::Decl<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
-fn procedure(pairs: Pairs<Rule>) -> decl::Procedure<Option<Span>, Identifier> {
-    pairs.fold(decl::Procedure::default(), |mut proc, pair| {
-        match pair.as_rule() {
-            Rule::prototype => proc.prototype = utils::lift_many(pair, call::prototype),
-            Rule::statement_list => proc.body = statement_list(pair.into_inner()),
-            r => utils::unexpected_rule(r),
-        };
-        proc
+/// Parses a pair as a decl.
+pub fn parse(pair: Pair<Rule>) -> Decl {
+    utils::match_rule!(pair {
+        constraint_decl => Decl::Constraint(constraint::decl(pair.into_inner())),
+        procedure_decl => Decl::Procedure(procedure(pair.into_inner())),
+        view_decl => Decl::View(view(pair.into_inner()))
     })
 }
 
-fn statement_list(
-    pairs: Pairs<Rule>,
-) -> Vec<Spanned<super::ast::StatementWithViews<Option<Span>, Identifier>>> {
-    // TODO
-    vec![]
+/// Shorthand for the type of procedures returned by this parser.
+pub type Procedure<'inp> = decl::Procedure<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+
+#[must_use]
+fn procedure(pairs: Pairs<Rule>) -> decl::Procedure<Option<Span>, Identifier> {
+    utils::match_rules!(pair in pairs, proc : Procedure {
+        prototype => proc.prototype = utils::lift_many(pair, call::prototype),
+        stm_list => proc.body = stm::list(pair.into_inner())
+    })
 }
 
 fn view(pairs: Pairs<Rule>) -> decl::View<Option<Span>, Identifier> {

@@ -1,6 +1,6 @@
 //! Declarations in the Starling abstract syntax.
 
-use super::{super::tagged::Tagged, call::Prototype, view, StatementWithViews};
+use super::{super::tagged::Tagged, call::Prototype, stm, view};
 
 /// A top-level declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -17,8 +17,8 @@ pub enum Decl<'inp, M, V> {
 pub struct Procedure<'inp, M, V> {
     /// The procedure prototype.
     pub prototype: Tagged<M, Prototype<'inp, M, V>>,
-    /// The body, as a list of tagged statements.
-    pub body: Vec<Tagged<M, StatementWithViews<'inp, M, V>>>,
+    /// The body, as a list of tagged statement triples.
+    pub body: stm::List<'inp, M, V>,
 }
 
 impl<'inp, M: Default, V> Default for Procedure<'inp, M, V> {

@@ -1,6 +1,5 @@
 //! Top-level of the Starling parser.
 
-use itertools::Itertools;
 use pest::{iterators::Pairs, Parser, Span};
 
 use super::language::{ast, tagged::Spanned};
@@ -9,6 +8,7 @@ mod call;
 mod constraint;
 mod decl;
 mod expr;
+mod stm;
 mod utils;
 mod view;
 
@@ -23,9 +23,7 @@ pub type Program<'inp> = ast::Program<'inp, Option<Span<'inp>>, ast::Identifier<
 /// Parses a program.
 pub fn parse(input: &str) -> Result<Spanned<Program>> {
     let pairs = StarlingParser::parse(Rule::program, input).map_err(Box::new)?;
-    let pair = pairs
-        .exactly_one()
-        .expect("parser should only allow one program here");
+    let pair = utils::one(pairs);
 
     let span = pair.as_span();
 

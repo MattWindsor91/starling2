@@ -1,6 +1,5 @@
 //! The expression parser.
 
-use crate::language::ast::expr::bop::Rel::GreaterEq;
 use once_cell::sync::OnceCell;
 use pest::{
     iterators::{Pair, Pairs},
@@ -80,6 +79,7 @@ fn infix_op(pair: Pair<Rule>) -> expr::Bop {
         add => Arith(Add),
         div => Arith(Div),
         modulus => Arith(Modulus),
+        int_div => Arith(IntDiv),
         sub => Arith(Sub),
         mul => Arith(Mul),
         and => Bool(And),

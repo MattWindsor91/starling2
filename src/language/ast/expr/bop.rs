@@ -19,11 +19,10 @@ pub enum Bop {
 /// Outputs a human-readable rendering of a binary operator.
 impl Display for Bop {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        use Bop::*;
         match self {
-            Arith(a) => a.fmt(f),
-            Bool(b) => b.fmt(f),
-            Rel(r) => r.fmt(f),
+            Bop::Arith(a) => a.fmt(f),
+            Bop::Bool(b) => b.fmt(f),
+            Bop::Rel(r) => r.fmt(f),
         }
     }
 }
@@ -51,14 +50,13 @@ pub enum Arith {
 /// Outputs a human-readable rendering of a binary arithmetic operator.
 impl Display for Arith {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        use Arith::*;
         f.write_str(match self {
-            Add => "+",
-            Sub => "-",
-            Mul => "*",
-            Div => "/",
-            IntDiv => "div",
-            Modulus => "mod",
+            Arith::Add => "+",
+            Arith::Sub => "-",
+            Arith::Mul => "*",
+            Arith::Div => "/",
+            Arith::IntDiv => "div",
+            Arith::Modulus => "mod",
         })
     }
 }
@@ -82,12 +80,11 @@ pub enum Bool {
 /// Outputs a human-readable rendering of a binary Boolean operator.
 impl Display for Bool {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        use Bool::*;
         f.write_str(match self {
-            And => "and",
-            Or => "or",
-            Implies => "implies",
-            Iff => "iff",
+            Bool::And => "and",
+            Bool::Or => "or",
+            Bool::Implies => "implies",
+            Bool::Iff => "iff",
         })
     }
 }
@@ -115,14 +112,13 @@ pub enum Rel {
 /// Outputs a human-readable rendering of a binary relational operator.
 impl Display for Rel {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        use Rel::*;
         f.write_str(match self {
-            Eq => "=",
-            NotEq => "<>",
-            Less => "<",
-            LessEq => "<=",
-            Greater => ">",
-            GreaterEq => ">=",
+            Rel::Eq => "=",
+            Rel::NotEq => "<>",
+            Rel::Less => "<",
+            Rel::LessEq => "<=",
+            Rel::Greater => ">",
+            Rel::GreaterEq => ">=",
         })
     }
 }

@@ -1,17 +1,39 @@
 //! Parser for views and view atoms.
 
-use pest::{
-    iterators::{Pair, Pairs},
-    Span,
-};
+use pest::{iterators::Pairs, Span};
 
 use super::{
     super::language::{
         ast::{view, Identifier},
         tagged::Spanned,
     },
-    utils, Rule,
+    call, utils, Rule,
 };
+
+//
+// Assertions
+//
+
+/// Shorthand for the type of pattern produced by the parser.
+pub type Assertion<'inp> = view::Assertion<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+
+/// Shorthand for the type of pattern atom produced by the parser.
+pub type AssertionAtom<'inp> = view::AssertionAtom<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+
+/// Parses a view assertion given the `pairs` over its contents.
+#[must_use]
+pub fn assertion(pairs: Pairs<Rule>) -> Assertion {
+    utils::match_rules!(pair in pairs, pat: Assertion {
+        view_assertion_atom => pat.contents.push(utils::lift_many(pair, assertion_atom))
+    })
+}
+
+fn assertion_atom(pairs: Pairs<Rule>) -> AssertionAtom {
+    utils::match_rules!(pair in pairs, asst: AssertionAtom {
+        call => asst.head = call::call(pair.into_inner())
+        // iterator
+    })
+}
 
 //
 // Patterns
@@ -23,7 +45,7 @@ pub type Pattern<'inp> = view::Pattern<'inp, Option<Span<'inp>>, Identifier<'inp
 /// Shorthand for the type of pattern atom produced by the parser.
 pub type PatternAtom<'inp> = view::PatternAtom<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
-/// Shorthand for the type of pattern atom produced by the parser.
+/// Shorthand for the type of pattern argument produced by the parser.
 pub type PatternArgument<'inp> = view::PatternArgument<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses a view pattern given the `pairs` over its contents.
@@ -36,8 +58,8 @@ pub fn pattern(pairs: Pairs<Rule>) -> Pattern {
 
 fn pattern_atom(pairs: Pairs<Rule>) -> PatternAtom {
     utils::match_rules!(pair in pairs, pat: PatternAtom {
-        identifier => pat.name = utils::spanned_id(pair),
-        view_pattern_argument_list => pat.args = pattern_arguments(pair.into_inner())
+        identifier => pat.head.name = utils::spanned_id(pair),
+        view_pattern_argument_list => pat.head.args = pattern_arguments(pair.into_inner())
     })
 }
 

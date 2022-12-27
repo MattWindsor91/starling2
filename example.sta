@@ -11,7 +11,7 @@ view CountWas(c: integer);
 
 procedure Clone;
 begin
-  (* {| Arc |} <| count++; |> {| Arc * Arc |} *)
+  { Arc } <| Inc(count) |> { Arc * Arc }
 end;
 
 procedure Print;
@@ -27,6 +27,7 @@ begin
   *)
 end;
 
+(*
 procedure Drop;
 begin
 (*
@@ -37,8 +38,9 @@ begin
       {| CountWas(1) |} <| free = true; |> {| emp |}
     }
   {| emp |}
-*)
+)
 end;
+*)
 
 (*
 constraint iter[n] Arc ->
