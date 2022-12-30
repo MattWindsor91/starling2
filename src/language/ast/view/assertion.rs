@@ -3,7 +3,7 @@
 use super::{
     super::{
         super::{tagged::Tagged, Expr},
-        call,
+        call, ite,
     },
     Iterated,
 };
@@ -42,15 +42,7 @@ pub struct Guarded<'inp, M, V> {
 }
 
 /// An if-then-else.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Ite<'inp, M, V> {
-    /// The view that holds if `cond` is true.
-    pub true_view: Box<Assertion<'inp, M, V>>,
-    /// The condition.
-    pub cond: Tagged<M, Expr<'inp, M, V>>,
-    /// The view that holds if `cond` is false.
-    pub false_view: Box<Assertion<'inp, M, V>>,
-}
+pub type Ite<'inp, M, V> = ite::Ite<'inp, M, V, Box<Assertion<'inp, M, V>>>;
 
 /// A view assertion atom.
 ///

@@ -101,8 +101,8 @@ view_prefix = _{
 view_guard = { "[" ~ expr ~ "]" }
 
 view_infix = _{
-    view_join
-    | view_ite
+    view_join   // Joining of two views.
+    | view_ite  // If-then-else.
 }
 view_join = { "*" }
 view_ite  = { "<[" ~ expr ~ "]>" }
@@ -113,8 +113,9 @@ view_postfix = _{
 view_iterate = { "[" ~ expr ~ "]" }
 
 view_primary = _{
-    "(" ~ view_assertion_body ~ ")"
-    | call // view assertion atom
+    "(" ~ view_assertion_body ~ ")"  // Bracketed view.
+    | "@(" ~ expr ~ ")"              // Local assertion.
+    | call                           // View assertion atom.
 }
 
 //
@@ -129,8 +130,7 @@ view_decl = {
 
 // A list of view decl elements.
 view_decl_list = {
-    prototype
-    ~ ("," ~ prototype)*
+    prototype ~ (";" ~ prototype)*
 }
 
 
@@ -227,16 +227,37 @@ stm_triple = {
 
 /// A statement.
 stm = {
-      atomic_stm // Atomic statement
+      atomic_stm // Atomic block statement
+    | assign     // Assignment statement
+    | block      // Block statement
     | call       // Procedure call
-    | nop_stm
+    | ite_stm    // If-then-else
+    | nop_stm    // No-operation
+}
+
+/// An assignment statement.
+assign = {
+    expr ~ ":=" ~ expr
+}
+
+/// A non-atomic block statement.
+block = {
+    "begin" ~ stm_list ~ "end"
+}
+
+/// An if-then-else statement.
+///
+/// An ITE switches between two triples based on the value of its expression.
+/// To nest multiple statements inside a branch, use blocks.
+ite_stm = {
+    "if" ~ expr ~ "then" ~ stm_triple ~ ("else" ~ stm_triple)?
 }
 
 nop_stm = { ^"nop" }
 
 /// A list of statements to be treated atomically.
 ///
-/// There are two forms of atomic statement syntax: one that uses keywords in
+/// There are two forms of atomic block statement syntax: one that uses keywords in
 /// the typical Pascal style, and another that uses angle brackets in an
 /// approximation of typical proof script style.
 atomic_stm = {
@@ -326,10 +347,27 @@ int_literal = @{ ASCII_DIGIT+ }
 // An identifier.
 identifier = @{ (!keyword) ~ XID_START ~ (XID_CONTINUE)* }
 
-// A global keyword, forbidden as an identifier.
+// A keyword, forbidden as an identifier.
 keyword = _{
+    // TODO(MattWindsor91): conditional keywords?
     ^"begin" |
-    ^"end"
+    ^"else" |
+    ^"end" |
+    ^"end." |
+    ^"constraint" |
+    ^"if" |
+    ^"procedure" |
+    ^"program" |
+    ^"then" |
+    ^"var" |
+    ^"view" |
+    // Terminals that contain keywords:
+    bool_literal |
+    int_div |
+    modulus |
+    nop_stm |
+    bool_op |
+    not
 }
 
 

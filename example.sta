@@ -6,8 +6,9 @@ shared int count;
 thread bool f;
 thread int c; *)
 
-view Arc;
-view CountWas(c: integer);
+view
+    Arc;
+    CountWas(c: integer);
 
 procedure Clone;
 begin
@@ -17,16 +18,11 @@ end;
 procedure Print;
 begin
   { Arc }
-    nop
+    <| f := free |>;
+  { Arc * @(not f) }
+    if f then
+      { assert(false) } <| error |> { assert(false) }
   { Arc }
-  (*
-    <| f := free; |>
-  {| if f == true { false } else { Arc } |}
-    if f == true {
-      {| false |} <| error; |> {| false |}
-    }
-  {| Arc |}
-  *)
 end;
 
 (*

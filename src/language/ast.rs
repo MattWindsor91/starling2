@@ -15,6 +15,7 @@ pub mod call;
 pub mod constraint;
 pub mod decl;
 pub mod expr;
+pub mod ite;
 pub mod stm;
 pub mod typing;
 pub mod variable;

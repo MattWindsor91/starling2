@@ -56,15 +56,16 @@ fn triple_view<'i>(triple: &mut Triple<'i>, pair: Pair<'i, Rule>) {
 #[must_use]
 pub fn parse(pair: Pair<Rule>) -> Stm {
     utils::match_rule!(pair {
-        atomic_stm => Stm::Atomic(atomic(utils::one_inner(pair))),
+        atomic_stm => Stm::Atomic(block(utils::one_inner(pair))),
+        block => Stm::Block(block(utils::one_inner(pair))),
         call => Stm::Call(call::parse(pair.into_inner())),
         nop_stm => Stm::Nop
     })
 }
 
-/// Parses `pair` as an atomic statement.
+/// Parses `pair` as a block statement.
 #[must_use]
-pub fn atomic(pair: Pair<Rule>) -> List {
+pub fn block(pair: Pair<Rule>) -> List {
     utils::match_rule!(pair {
         stm_list => list(pair.into_inner())
     })

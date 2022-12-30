@@ -32,17 +32,25 @@ impl<'inp, M: Default, V> Default for Triple<'inp, M, V> {
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum Stm<'inp, M, V> {
-    /// An atomic statement.
+    /// An atomic block statement.
     ///
     /// The semantics of an atomic statement is that all of the statements contained within are
     /// combined into one effective statement for the purposes of verification.  In other words,
     /// there is no interference permitted at any point within.
     Atomic(List<'inp, M, V>),
+    /// A non-atomic block statement.
+    ///
+    /// The semantics of a block statement is that all of the statements contained within are
+    /// considered separately but sequentially for the purposes of verification.  In other words,
+    /// we permit interference at any point within.
+    Block(List<'inp, M, V>),
     /// A call statement.
     ///
     /// The semantics of a call statement is an assert-assume: we assert that we satisfy the
     /// pre-condition of the procedure, and assume the post-condition of the procedure.
     Call(call::Call<'inp, M, V>),
+    /// An if-then-else statement.
+    ///
     /// A no-operation statement.
     #[default]
     Nop,
