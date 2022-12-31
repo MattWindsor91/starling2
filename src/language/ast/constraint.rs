@@ -1,13 +1,14 @@
 //! Constraint bodies.
 
 use super::{super::tagged::Tagged, expr, view};
+use crate::language::ast::view::pattern;
 
 /// A constraint declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Decl<'inp, M, V> {
     /// List of views that are bound by this constraint.
-    pub views: Vec<Tagged<M, view::Pattern<'inp, M, V>>>,
+    pub views: Vec<Tagged<M, pattern::Pattern<'inp, M, V>>>,
     /// Body of the constraint.
     pub body: Tagged<M, Constraint<'inp, M, V>>,
 }

@@ -23,7 +23,7 @@ pub type Entailment<'inp> = constraint::Entailment<'inp, Option<Span<'inp>>, Ide
 #[must_use]
 pub fn decl(pairs: Pairs<Rule>) -> Decl {
     utils::match_rules!(pair in pairs, constr : Decl {
-        view_pattern => constr.views.push(utils::lift_many(pair, view::pattern)),
+        view_pattern => constr.views.push(utils::lift_many(pair, view::pattern::parse)),
         constraint => constr.body = utils::lift_one(pair, parse)
     })
 }
