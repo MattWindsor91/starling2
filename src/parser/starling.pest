@@ -122,14 +122,8 @@ view_primary = _{
 // A decl for one or more view atoms.
 view_decl = {
     ^"view"
-    ~ view_decl_list
+    ~ prototype ~ (";" ~ prototype)*
 }
-
-// A list of view decl elements.
-view_decl_list = {
-    prototype ~ (";" ~ prototype)*
-}
-
 
 //
 // Procedure decls
@@ -153,7 +147,7 @@ prototype = {
     identifier ~ parameter_list?
 }
 
-parameter_list = {
+parameter_list = _{
     "("
     ~ (parameter ~ ("," ~ parameter)*)?
     ~ ")"
@@ -185,7 +179,7 @@ refinement_type = {
     ~ expr
 }
 
-// An array type.
+/// An array type.
 array_type = {
     "array"
     ~ "["
@@ -195,17 +189,20 @@ array_type = {
     ~ starling_type
 }
 
-// Bounds for an array type.
+/// Bounds for an array type.
 array_bound = {
     int_literal
     ~ ".."
     ~ int_literal
 }
 
+/// A primitive type.
 primitive_type = {
-    ^"boolean"
-    | ^"integer"
+    boolean_type
+    | integer_type
 }
+boolean_type = { ^"boolean" }
+integer_type = { ^"integer" }
 
 
 //
@@ -349,7 +346,9 @@ literal =
     }
 
 // Boolean literal (case-insensitive true or false).
-bool_literal = { ^"true" | ^"false" }
+bool_literal  = { true_literal | false_literal }
+true_literal  = { ^"true" }
+false_literal = { ^"false" }
 
 // Integer literal (decimal number, possibly with a sign).
 int_literal = @{ ASCII_DIGIT+ }
@@ -373,12 +372,13 @@ keyword = _{
     ^"view" |
     // Terminals that contain keywords:
     bool_literal |
+    bool_op |
     empty_view |
     int_div |
     modulus |
     nop_stm |
-    bool_op |
-    not
+    not |
+    primitive_type
 }
 
 

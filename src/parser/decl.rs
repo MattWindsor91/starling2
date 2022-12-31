@@ -7,7 +7,7 @@ use pest::{
 
 use super::{
     super::language::ast::{decl, Identifier},
-    call, constraint, stm, utils, Rule,
+    call, constraint, stm, utils, view, Rule,
 };
 
 /// Shorthand for the type of declarations returned by this parser.
@@ -18,7 +18,7 @@ pub fn parse(pair: Pair<Rule>) -> Decl {
     utils::match_rule!(pair {
         constraint_decl => Decl::Constraint(constraint::decl(pair.into_inner())),
         procedure_decl => Decl::Procedure(procedure(pair.into_inner())),
-        view_decl => Decl::View(view(pair.into_inner()))
+        view_decl => Decl::View(view::decl::parse(pair.into_inner()))
     })
 }
 
@@ -31,12 +31,4 @@ fn procedure(pairs: Pairs<Rule>) -> decl::Procedure<Option<Span>, Identifier> {
         prototype => proc.prototype = utils::lift_many(pair, call::prototype),
         stm_list => proc.body = stm::list(pair.into_inner())
     })
-}
-
-fn view(pairs: Pairs<Rule>) -> decl::View<Option<Span>, Identifier> {
-    let mut view = decl::View { elements: vec![] };
-
-    // TODO
-
-    view
 }

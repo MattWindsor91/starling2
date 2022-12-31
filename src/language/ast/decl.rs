@@ -1,14 +1,14 @@
 //! Declarations in the Starling abstract syntax.
 
-use super::{super::tagged::Tagged, call::Prototype, stm, view};
+use super::{super::tagged::Tagged, call::Prototype, constraint, stm, view};
 
 /// A top-level declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum Decl<'inp, M, V> {
-    Constraint(super::constraint::Decl<'inp, M, V>),
+    Constraint(constraint::Decl<'inp, M, V>),
     Procedure(Procedure<'inp, M, V>),
-    View(View<'inp, M, V>),
+    View(view::Decl<'inp, M, V>),
 }
 
 /// A procedure declaration.
@@ -28,11 +28,4 @@ impl<'inp, M: Default, V> Default for Procedure<'inp, M, V> {
             body: vec![],
         }
     }
-}
-
-/// A declaration for one or more view atoms.
-#[derive(Clone, Debug, PartialEq, Eq)]
-#[non_exhaustive]
-pub struct View<'inp, M, V> {
-    pub elements: Vec<view::Prototype<'inp, M, V>>,
 }

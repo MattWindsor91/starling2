@@ -56,7 +56,7 @@ pub fn parse(pairs: Pairs<Rule>) -> Expr {
 fn primary(primary: Pair<Rule>) -> Expr {
     utils::match_rule!(primary {
         identifier => Expr::Var(utils::spanned_id(&primary)),
-        literal => literal(&utils::one(primary.into_inner())),
+        literal => literal(utils::one(primary.into_inner())),
         expr => parse(primary.into_inner())
     })
 }
@@ -101,12 +101,12 @@ fn infix_op(pair: &Pair<Rule>) -> expr::Bop {
 }
 
 /// Parses a literal expression.
-fn literal<'inp>(pair: &Pair<'inp, Rule>) -> Expr<'inp> {
+fn literal(pair: Pair<Rule>) -> Expr {
     Expr::Literal(utils::spanned(
         pair.as_span(),
         utils::match_rule!(pair {
             int_literal => expr::Literal::Int(int(pair.as_str())),
-            bool_literal => expr::Literal::Bool(bool(pair.as_str()))
+            bool_literal => expr::Literal::Bool(bool(&utils::one_inner(pair)))
         }),
     ))
 }
@@ -136,18 +136,9 @@ fn int(inp: &str) -> expr::literal::Int {
 
 /// Parses a Boolean.
 ///
-/// # Panics
-///
-/// Panics if the upstream parser sent us a Boolean literal that is badly formed.
-fn bool(inp: &str) -> bool {
-    if inp.eq_ignore_ascii_case("true") {
-        true
-    } else if inp.eq_ignore_ascii_case("false") {
-        false
-    } else {
-        unreachable!(
-            "parser should have disallowed erroneous boolean input {:?}",
-            inp
-        )
-    }
+fn bool(pair: &Pair<Rule>) -> bool {
+    utils::match_rule!(pair {
+        true_literal => true,
+        false_literal => false
+    })
 }

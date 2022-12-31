@@ -1,17 +1,14 @@
 //! Abstract syntax for views.
 
 pub use assertion::Assertion;
+pub use decl::Decl;
+pub use pattern::Pattern;
 
-use super::{
-    super::{tagged::Tagged, Expr},
-    call,
-};
+use super::super::{tagged::Tagged, Expr};
 
 pub mod assertion;
+pub mod decl;
 pub mod pattern;
-
-/// A view prototype.
-pub type Prototype<'inp, M, V> = call::Prototype<'inp, M, V>;
 
 /// Wraps a view component with an iterator.
 ///

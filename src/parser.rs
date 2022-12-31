@@ -9,6 +9,7 @@ mod constraint;
 mod decl;
 mod expr;
 mod stm;
+mod typing;
 mod utils;
 mod view;
 

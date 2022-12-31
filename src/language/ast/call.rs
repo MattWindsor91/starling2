@@ -33,6 +33,18 @@ pub type Prototype<'inp, M, V> = Generic<'inp, M, Parameter<'inp, M, V>>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Parameter<'inp, M, V> {
-    pub name: Identifier<'inp>,
-    pub ty: Type<'inp, M, V>,
+    /// Name of the parameter.
+    pub name: Tagged<M, Identifier<'inp>>,
+    /// Type of the parameter.
+    pub ty: Tagged<M, Type<'inp, M, V>>,
+}
+
+/// The default parameter has integer type and a default name.
+impl<'inp, M: Default, V: Default> Default for Parameter<'inp, M, V> {
+    fn default() -> Self {
+        Parameter {
+            name: Tagged::default(),
+            ty: Tagged::with_default(Type::INT),
+        }
+    }
 }

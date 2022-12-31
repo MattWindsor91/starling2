@@ -27,6 +27,11 @@ pub enum Type<P> {
     Prim(Prim),
 }
 
+impl<P> Type<P> {
+    /// The integer primitive type.
+    pub const INT: Self = Type::Prim(Prim::Int);
+}
+
 impl<P: Display> Display for Type<P> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {

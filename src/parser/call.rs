@@ -7,21 +7,34 @@ use super::{
         ast::{call, Identifier},
         tagged::Spanned,
     },
-    expr, utils, Rule,
+    expr, typing, utils, Rule,
 };
 
 //
 // Prototypes
 //
 
-/// Parses a `pair` representing a function prototype.
-pub fn prototype(pairs: Pairs<Rule>) -> call::Prototype<Option<Span>, Identifier> {
-    pairs.fold(call::Prototype::default(), |mut proto, pair| {
-        match pair.as_rule() {
-            Rule::identifier => proto.name = utils::spanned_id(&pair),
-            r => utils::unexpected_rule(r),
-        };
-        proto
+/// Shorthand for the type of prototype returned by `prototype`.
+pub type Prototype<'inp> = call::Prototype<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+
+/// Shorthand for the type of parameter returned by `parameter`.
+pub type Parameter<'inp> = call::Parameter<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+
+/// Parses `pairs` representing a function or view prototype.
+#[must_use]
+pub fn prototype(pairs: Pairs<Rule>) -> Prototype {
+    utils::match_rules!(pair in pairs, proto: Prototype {
+        identifier => proto.name = utils::spanned_id(&pair),
+        parameter => proto.args.push(utils::lift_many(pair, parameter))
+    })
+}
+
+/// Parses `pairs` representing a formal parameter.
+#[must_use]
+pub fn parameter(pairs: Pairs<Rule>) -> Parameter {
+    utils::match_rules!(pair in pairs, param: Parameter {
+        identifier => param.name = utils::spanned_id(&pair),
+        starling_type => param.ty = utils::lift_one(pair, typing::starling_type)
     })
 }
 
