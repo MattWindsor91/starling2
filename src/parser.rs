@@ -21,6 +21,10 @@ struct StarlingParser;
 pub type Program<'inp> = ast::Program<'inp, Option<Span<'inp>>, ast::Identifier<'inp>>;
 
 /// Parses a program.
+///
+/// # Errors
+///
+/// Fails if `input` could not be parsed correctly.
 pub fn parse(input: &str) -> Result<Spanned<Program>> {
     let pairs = StarlingParser::parse(Rule::program, input).map_err(Box::new)?;
     let pair = utils::one(pairs);
@@ -34,7 +38,7 @@ pub fn parse(input: &str) -> Result<Spanned<Program>> {
 
 fn program(pairs: Pairs<Rule>) -> Program {
     utils::match_rules!(pair in pairs, prog: Program {
-        identifier => prog.name = utils::spanned_id(pair),
+        identifier => prog.name = utils::spanned_id(&pair),
         decl => prog.decls.push(utils::lift_one(pair, decl::parse)),
         EOI => ()
     })

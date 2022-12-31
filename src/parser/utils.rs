@@ -51,7 +51,7 @@ pub fn spanned<T>(span: Span, item: T) -> Spanned<T> {
 
 /// Creates a spanned identifier from its pair.
 #[must_use]
-pub fn spanned_id(pair: Pair<Rule>) -> Spanned<super::ast::Identifier> {
+pub fn spanned_id<'inp>(pair: &Pair<'inp, Rule>) -> Spanned<'inp, super::ast::Identifier<'inp>> {
     spanned(pair.as_span(), super::ast::Identifier::from(pair.as_str()))
 }
 
@@ -66,7 +66,7 @@ pub fn spanned_id(pair: Pair<Rule>) -> Spanned<super::ast::Identifier> {
 #[must_use]
 pub fn lift_many<'inp, T>(
     pair: Pair<'inp, Rule>,
-    parser: fn(Pairs<'inp, Rule>) -> T,
+    parser: impl FnOnce(Pairs<'inp, Rule>) -> T,
 ) -> Spanned<'inp, T> {
     spanned(pair.as_span(), parser(pair.into_inner()))
 }
@@ -78,7 +78,7 @@ pub fn lift_many<'inp, T>(
 #[must_use]
 pub fn lift_one<'inp, T>(
     pair: Pair<'inp, Rule>,
-    parser: fn(Pair<'inp, Rule>) -> T,
+    parser: impl FnOnce(Pair<'inp, Rule>) -> T,
 ) -> Spanned<'inp, T> {
     spanned(pair.as_span(), parser(one_inner(pair)))
 }

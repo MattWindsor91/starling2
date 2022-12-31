@@ -48,7 +48,7 @@ pub fn pattern(pairs: Pairs<Rule>) -> Pattern {
 
 fn pattern_atom(pairs: Pairs<Rule>) -> PatternAtom {
     utils::match_rules!(pair in pairs, pat: PatternAtom {
-        identifier => pat.name = utils::spanned_id(pair),
+        identifier => pat.name = utils::spanned_id(&pair),
         view_pattern_argument_list => pat.args = pattern_arguments(pair.into_inner())
     })
 }

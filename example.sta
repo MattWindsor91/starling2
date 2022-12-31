@@ -20,25 +20,21 @@ begin
   { Arc }
     <| f := free |>;
   { Arc * @(not f) }
-    if f then
-      { assert(false) } <| error |> { assert(false) }
+    if f then <| error |>
   { Arc }
 end;
 
-(*
 procedure Drop;
 begin
-(*
-  {| Arc |}
-    <| c = count--; |>
-  {| CountWas(c) |}
-    if c == 1 {
-      {| CountWas(1) |} <| free = true; |> {| emp |}
-    }
-  {| emp |}
-)
+  { Arc }
+    <| c := count; Dec(count) |>;
+  { CountWas(c) }
+    if c = 1 then
+    begin
+      { CountWas(1) } <| free := true |> { emp }
+    end
+  { emp }
 end;
-*)
 
 (*
 constraint iter[n] Arc ->

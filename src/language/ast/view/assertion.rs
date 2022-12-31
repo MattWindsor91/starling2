@@ -3,7 +3,7 @@
 use super::{
     super::{
         super::{tagged::Tagged, Expr},
-        call, ite,
+        call, expr, ite,
     },
     Iterated,
 };
@@ -16,6 +16,8 @@ use super::{
 pub enum Assertion<'inp, M, V> {
     /// A view atom.
     Atom(Tagged<M, Atom<'inp, M, V>>),
+    /// An empty view.
+    Emp,
     /// A guarded view assertion.
     Guarded(Guarded<'inp, M, V>),
     /// An if-then-else construct.
@@ -30,6 +32,10 @@ pub enum Assertion<'inp, M, V> {
     Iterated(Iterated<'inp, M, V, Box<Assertion<'inp, M, V>>>),
     /// A join of two assertions.
     Join(Box<Assertion<'inp, M, V>>, Box<Assertion<'inp, M, V>>),
+    /// A local assertion.
+    ///
+    /// This is a Boolean expression over local variables, which is mixed into non-local views.
+    Local(expr::Tagged<'inp, M, V>),
 }
 
 /// A guarded view.

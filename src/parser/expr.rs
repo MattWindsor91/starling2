@@ -3,7 +3,7 @@
 use once_cell::sync::OnceCell;
 use pest::{
     iterators::{Pair, Pairs},
-    pratt_parser::{Assoc, Op, PrattParser},
+    pratt_parser::{Op, PrattParser},
     Span,
 };
 
@@ -17,19 +17,22 @@ static PARSER: OnceCell<PrattParser<Rule>> = OnceCell::new();
 
 /// Initialises the Pratt parser.
 fn init() -> PrattParser<Rule> {
-    use Rule::*;
     PrattParser::new()
-        .op(l_infix(eq)
-            | l_infix(not_eq)
-            | l_infix(less)
-            | l_infix(less_eq)
-            | l_infix(greater)
-            | l_infix(greater_eq))
-        .op(l_infix(add) | l_infix(sub) | l_infix(or))
-        .op(l_infix(mul) | l_infix(div) | l_infix(int_div) | l_infix(modulus) | l_infix(and))
-        .op(l_infix(implies) | l_infix(iff))
-        .op(Op::prefix(not) | Op::prefix(neg) | Op::prefix(pos))
-        .op(Op::postfix(subscript))
+        .op(l_infix(Rule::eq)
+            | l_infix(Rule::not_eq)
+            | l_infix(Rule::less)
+            | l_infix(Rule::less_eq)
+            | l_infix(Rule::greater)
+            | l_infix(Rule::greater_eq))
+        .op(l_infix(Rule::add) | l_infix(Rule::sub) | l_infix(Rule::or))
+        .op(l_infix(Rule::mul)
+            | l_infix(Rule::div)
+            | l_infix(Rule::int_div)
+            | l_infix(Rule::modulus)
+            | l_infix(Rule::and))
+        .op(l_infix(Rule::implies) | l_infix(Rule::iff))
+        .op(Op::prefix(Rule::not) | Op::prefix(Rule::minus) | Op::prefix(Rule::plus))
+        .op(Op::postfix(Rule::subscript))
 }
 
 /// Shorthand for type of expressions returned by this parser.
@@ -44,60 +47,61 @@ pub fn parse(pairs: Pairs<Rule>) -> Expr {
     let parser = PARSER.get_or_init(init);
     parser
         .map_primary(primary)
-        .map_prefix(|op, rhs| match op.as_rule() {
-            r => utils::unexpected_rule(r),
-        })
-        .map_postfix(|lhs, op| match op.as_rule() {
-            r => utils::unexpected_rule(r),
-        })
-        .map_infix(infix)
+        .map_prefix(|op, rhs| Expr::uop(prefix_op(&op), rhs))
+        .map_postfix(|lhs, op| Expr::uop(postfix_op(&op), lhs))
+        .map_infix(|lhs, op, rhs| Expr::bop(lhs, infix_op(&op), rhs))
         .parse(pairs)
 }
 
 fn primary(primary: Pair<Rule>) -> Expr {
     utils::match_rule!(primary {
-        identifier => Expr::Var(utils::spanned_id(primary)),
-        literal => literal(utils::one(primary.into_inner())),
+        identifier => Expr::Var(utils::spanned_id(&primary)),
+        literal => literal(&utils::one(primary.into_inner())),
         expr => parse(primary.into_inner())
     })
 }
 
-fn infix<'inp>(lhs: Expr<'inp>, op: Pair<Rule>, rhs: Expr<'inp>) -> Expr<'inp> {
-    Expr::Bop {
-        lhs: Box::new(lhs),
-        op: infix_op(op),
-        rhs: Box::new(rhs),
-    }
+/// Parses prefix operators.
+fn prefix_op<'inp>(op: &Pair<Rule>) -> expr::Uop {
+    utils::match_rule!(op {
+        minus => expr::Uop::Minus,
+        not => expr::Uop::Not,
+        plus => expr::Uop::Plus
+    })
+}
+
+/// Parses postfix operators.
+fn postfix_op<'inp>(op: &Pair<Rule>) -> expr::Uop {
+    utils::match_rule!(op {
+        deref => expr::Uop::Deref
+    })
 }
 
 /// Parses infix operators.
-fn infix_op(pair: Pair<Rule>) -> expr::Bop {
-    use expr::bop::Arith::*;
-    use expr::bop::Bool::*;
-    use expr::bop::Rel::*;
-    use expr::Bop::*;
+fn infix_op(pair: &Pair<Rule>) -> expr::Bop {
+    use expr::bop::{Arith, Bool, Bop, Rel};
     utils::match_rule!(pair {
-        add => Arith(Add),
-        div => Arith(Div),
-        modulus => Arith(Modulus),
-        int_div => Arith(IntDiv),
-        sub => Arith(Sub),
-        mul => Arith(Mul),
-        and => Bool(And),
-        iff => Bool(Iff),
-        implies => Bool(Implies),
-        or => Bool(Or),
-        eq => Rel(Eq),
-        not_eq => Rel(NotEq),
-        less => Rel(Less),
-        less_eq => Rel(LessEq),
-        greater => Rel(Greater),
-        greater_eq => Rel(GreaterEq)
+        add => Bop::Arith(Arith::Add),
+        div => Bop::Arith(Arith::Div),
+        modulus => Bop::Arith(Arith::Modulus),
+        int_div => Bop::Arith(Arith::IntDiv),
+        sub => Bop::Arith(Arith::Sub),
+        mul => Bop::Arith(Arith::Mul),
+        and => Bop::Bool(Bool::And),
+        iff => Bop::Bool(Bool::Iff),
+        implies => Bop::Bool(Bool::Implies),
+        or => Bop::Bool(Bool::Or),
+        eq => Bop::Rel(Rel::Eq),
+        not_eq => Bop::Rel(Rel::NotEq),
+        less => Bop::Rel(Rel::Less),
+        less_eq => Bop::Rel(Rel::LessEq),
+        greater => Bop::Rel(Rel::Greater),
+        greater_eq => Bop::Rel(Rel::GreaterEq)
     })
 }
 
 /// Parses a literal expression.
-fn literal(pair: Pair<Rule>) -> Expr {
+fn literal<'inp>(pair: &Pair<'inp, Rule>) -> Expr<'inp> {
     Expr::Literal(utils::spanned(
         pair.as_span(),
         utils::match_rule!(pair {
@@ -130,7 +134,7 @@ fn int(inp: &str) -> expr::literal::Int {
     }
 }
 
-/// Parses a Boolean..
+/// Parses a Boolean.
 ///
 /// # Panics
 ///

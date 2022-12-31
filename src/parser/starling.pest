@@ -86,12 +86,8 @@ empty_view = { ^"emp" }
 // View assertions (Pratt parsing)
 //
 
-view_assertion = {
-    "{" ~ view_assertion_body ~ "}"
-}
-
 /// A Pratt-parsed view assertion body.
-view_assertion_body = !{
+view_assertion = !{
     view_prefix* ~ view_primary~ view_postfix* ~ (view_infix ~ view_prefix* ~ view_primary~ view_postfix* )*
 }
 
@@ -105,7 +101,7 @@ view_infix = _{
     | view_ite  // If-then-else.
 }
 view_join = { "*" }
-view_ite  = { "<[" ~ expr ~ "]>" }
+view_ite  = { "<[" ~ condition ~ "]>" }
 
 view_postfix = _{
     view_iterate
@@ -113,9 +109,10 @@ view_postfix = _{
 view_iterate = { "[" ~ expr ~ "]" }
 
 view_primary = _{
-    "(" ~ view_assertion_body ~ ")"  // Bracketed view.
-    | "@(" ~ expr ~ ")"              // Local assertion.
-    | call                           // View assertion atom.
+    "(" ~ view_assertion ~ ")"  // Bracketed view.
+    | "@(" ~ expr ~ ")"         // Local assertion.
+    | empty_view                // Empty view.
+    | call                      // View assertion atom.
 }
 
 //
@@ -222,7 +219,12 @@ stm_list = {
 
 /// A statement that is optionally surrounded with view expressions.
 stm_triple = {
-    view_assertion? ~ stm ~ view_assertion?
+    triple_view_assertion? ~ stm ~ triple_view_assertion?
+}
+
+/// A view assertion within a triple.
+triple_view_assertion = _{
+    "{" ~ view_assertion ~ "}"
 }
 
 /// A statement.
@@ -247,11 +249,18 @@ block = {
 
 /// An if-then-else statement.
 ///
-/// An ITE switches between two triples based on the value of its expression.
-/// To nest multiple statements inside a branch, use blocks.
+/// An ITE switches between two statements based on the value of its expression.
+/// To nest multiple statements inside a branch, or inject triples, use blocks.
 ite_stm = {
-    "if" ~ expr ~ "then" ~ stm_triple ~ ("else" ~ stm_triple)?
+    "if" ~ condition ~ "then" ~ stm ~ ("else" ~ stm)?
 }
+
+/// An if-then-else condition.
+condition = {
+    nondeterminism |
+    expr
+}
+nondeterminism = { "*" }
 
 nop_stm = { ^"nop" }
 
@@ -300,9 +309,9 @@ not_eq     =  { "<>" }
 greater    =  { "<" }
 greater_eq =  { "<=" }
 
-prefix =  _{ pos | neg | not }
-pos    =   { "+" }
-neg    =   { "-" }
+prefix =  _{ plus | minus | not }
+plus   =   { "+" }
+minus  =   { "-" }
 not    =   { ^"not" }
 
 /// A postfix operator.
@@ -310,8 +319,9 @@ not    =   { ^"not" }
 /// Note that function calls and subscripts are both considered postfix
 /// operators; this differs from how we parse procedure calls in
 /// statements.
-postfix   =  _{ argument_list | subscript }
+postfix   =  _{ argument_list | subscript | deref }
 subscript =   { "[" ~ expr ~ "]" }
+deref     =   { "^" }
 
 primary  =  _{ literal | identifier | "(" ~ expr ~ ")" }
 
@@ -363,6 +373,7 @@ keyword = _{
     ^"view" |
     // Terminals that contain keywords:
     bool_literal |
+    empty_view |
     int_div |
     modulus |
     nop_stm |

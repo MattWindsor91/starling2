@@ -18,7 +18,7 @@ use super::{
 pub fn prototype(pairs: Pairs<Rule>) -> call::Prototype<Option<Span>, Identifier> {
     pairs.fold(call::Prototype::default(), |mut proto, pair| {
         match pair.as_rule() {
-            Rule::identifier => proto.name = utils::spanned_id(pair),
+            Rule::identifier => proto.name = utils::spanned_id(&pair),
             r => utils::unexpected_rule(r),
         };
         proto
@@ -39,7 +39,7 @@ pub type ArgumentList<'inp> = Vec<Spanned<'inp, expr::Expr<'inp>>>;
 #[must_use]
 pub fn parse(pairs: Pairs<Rule>) -> Call {
     utils::match_rules!(pair in pairs, call: Call {
-        identifier => call.name = utils::spanned_id(pair),
+        identifier => call.name = utils::spanned_id(&pair),
         argument_list => call.args = argument_list(pair.into_inner())
     })
 }

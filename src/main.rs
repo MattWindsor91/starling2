@@ -1,9 +1,8 @@
-#[warn(clippy::pedantic)]
-mod language;
-mod parser;
+//! The main starling entry point.
 
-use std::path::Path;
-use std::process::exit;
+#![warn(clippy::pedantic)]
+
+use std::{path::Path, process::exit};
 
 pub use pest::Parser;
 
@@ -13,7 +12,7 @@ fn main() -> eyre::Result<()> {
     let path = "example.sta";
 
     match run(path) {
-        Err(Error::Parser(parser::Error::Parse(e))) => {
+        Err(Error::Parser(starling::parser::Error::Parse(e))) => {
             eprintln!("Parse error in file {path}:");
             eprintln!("{e}");
             exit(1);
@@ -26,7 +25,7 @@ fn main() -> eyre::Result<()> {
 
 fn run(path: impl AsRef<Path>) -> Result<()> {
     let contents = std::fs::read_to_string(path)?;
-    let ast = parser::parse(&contents)?;
+    let ast = starling::parser::parse(&contents)?;
 
     println!("{ast:#?}");
 
@@ -38,7 +37,7 @@ enum Error {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("Parser error: {0}")]
-    Parser(#[from] parser::Error),
+    Parser(#[from] starling::parser::Error),
 }
 
 type Result<T> = std::result::Result<T, Error>;

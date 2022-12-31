@@ -11,11 +11,8 @@ use pest::{
 };
 
 use super::super::{
-    super::language::{
-        ast::{view::assertion, Identifier},
-        tagged::Spanned,
-    },
-    call,
+    super::language::ast::{view::assertion, Identifier},
+    call, expr,
     utils::{self, l_infix},
     Rule,
 };
@@ -24,32 +21,23 @@ static PARSER: OnceCell<PrattParser<Rule>> = OnceCell::new();
 
 /// Initialises the assertion Pratt parser.
 fn init() -> PrattParser<Rule> {
-    use Rule::*;
     PrattParser::new()
-        .op(l_infix(view_join))
-        .op(l_infix(view_ite))
-        .op(Op::prefix(view_guard))
-        .op(Op::postfix(view_iterate))
+        .op(l_infix(Rule::view_join))
+        .op(l_infix(Rule::view_ite))
+        .op(Op::prefix(Rule::view_guard))
+        .op(Op::postfix(Rule::view_iterate))
 }
 
 /// Shorthand for the type of pattern produced by the parser.
 pub type Assertion<'inp> = assertion::Assertion<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
-/// Parses a `pair` into a view assertion (with brackets).
-#[must_use]
-pub fn parse(pair: Pair<Rule>) -> Assertion {
-    utils::match_rule!(pair {
-        view_assertion_body => body(pair.into_inner())
-    })
-}
-
 /// Parses a view assertion body given the `pairs` over its contents.
 #[must_use]
-pub fn body(pairs: Pairs<Rule>) -> Assertion {
+pub fn parse(pairs: Pairs<Rule>) -> Assertion {
     let parser = PARSER.get_or_init(init);
     parser
         .map_primary(primary)
-        .map_infix(infix)
+        .map_infix(|lhs, op, rhs| infix(lhs, &op, rhs))
         .map_postfix(postfix)
         .parse(pairs)
 }
@@ -58,7 +46,9 @@ pub fn body(pairs: Pairs<Rule>) -> Assertion {
 fn primary(pair: Pair<Rule>) -> Assertion {
     utils::match_rule!(pair {
         call => Assertion::Atom(utils::lift_many(pair, call::parse)),
-        view_assertion_body => body(pair.into_inner())
+        expr => Assertion::Local(utils::lift_many(pair, expr::parse)),
+        empty_view => Assertion::Emp,
+        view_assertion => parse(pair.into_inner())
     })
 }
 
@@ -67,7 +57,7 @@ fn primary(pair: Pair<Rule>) -> Assertion {
 /// Right now, there is only one infix operator: view join.
 fn infix<'inp>(
     lhs: Assertion<'inp>,
-    op: Pair<'inp, Rule>,
+    op: &Pair<'inp, Rule>,
     rhs: Assertion<'inp>,
 ) -> Assertion<'inp> {
     utils::match_rule!(op {

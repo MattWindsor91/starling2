@@ -17,6 +17,15 @@ impl<M, T> Tagged<M, T> {
     pub fn new(meta: M, item: T) -> Self {
         Self { meta, item }
     }
+
+    /// Maps a function over the item of a tagged node.
+    #[must_use]
+    pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Tagged<M, U> {
+        Tagged {
+            meta: self.meta,
+            item: f(self.item),
+        }
+    }
 }
 
 impl<M: Default, T> Tagged<M, T> {
@@ -24,6 +33,13 @@ impl<M: Default, T> Tagged<M, T> {
     #[must_use]
     pub fn with_default(item: T) -> Self {
         Self::new(M::default(), item)
+    }
+}
+
+/// We can convert untagged things into tagged things so long as there is a default tag.
+impl<M: Default, T> From<T> for Tagged<M, T> {
+    fn from(value: T) -> Self {
+        Self::with_default(value)
     }
 }
 
