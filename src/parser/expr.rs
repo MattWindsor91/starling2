@@ -62,7 +62,7 @@ fn primary(primary: Pair<Rule>) -> Expr {
 }
 
 /// Parses prefix operators.
-fn prefix_op<'inp>(op: &Pair<Rule>) -> expr::Uop {
+fn prefix_op(op: &Pair<Rule>) -> expr::Uop {
     utils::match_rule!(op {
         minus => expr::Uop::Minus,
         not => expr::Uop::Not,
@@ -71,7 +71,7 @@ fn prefix_op<'inp>(op: &Pair<Rule>) -> expr::Uop {
 }
 
 /// Parses postfix operators.
-fn postfix_op<'inp>(op: &Pair<Rule>) -> expr::Uop {
+fn postfix_op(op: &Pair<Rule>) -> expr::Uop {
     utils::match_rule!(op {
         deref => expr::Uop::Deref
     })

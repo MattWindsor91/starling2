@@ -36,10 +36,8 @@ begin
   { emp }
 end;
 
-(*
-constraint iter[n] Arc ->
-    n > 0 => (free == false && n <= count);
-*)
+
+constraint Arc[n] entails n > 0 implies (free = false and n <= count);
 
 constraint CountWas(c) entails c = 1 implies (free = false and count = 0);
 

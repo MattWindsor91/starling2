@@ -306,8 +306,8 @@ less       =  { "<" }
 less_eq    =  { "<=" }
 eq         =  { "=" }
 not_eq     =  { "<>" }
-greater    =  { "<" }
-greater_eq =  { "<=" }
+greater    =  { ">" }
+greater_eq =  { ">=" }
 
 prefix =  _{ plus | minus | not }
 plus   =   { "+" }
