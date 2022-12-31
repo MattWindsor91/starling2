@@ -1,6 +1,6 @@
 //! Programs, procedures, and declarations.
 
-use super::{super::tagged::Tagged, call::Prototype, constraint, stm, view, Identifier};
+use super::{super::tagged::Tagged, call::Prototype, constraint, stm, var, view, Identifier};
 
 /// A program.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -29,8 +29,13 @@ impl<'inp, M: Default, V> Default for Program<'inp, M, V> {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum Decl<'inp, M, V> {
+    /// A constraint declaration.
     Constraint(constraint::Decl<'inp, M, V>),
+    /// A procedure declaration.
     Procedure(Procedure<'inp, M, V>),
+    /// A variable declaration.
+    Var(var::Decl<'inp, M, V>),
+    /// A view declaration.
     View(view::Decl<'inp, M, V>),
 }
 

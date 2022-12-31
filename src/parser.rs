@@ -11,6 +11,7 @@ mod program;
 mod stm;
 mod typing;
 mod utils;
+mod var;
 mod view;
 
 /// The Starling parser.

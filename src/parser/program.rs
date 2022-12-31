@@ -1,4 +1,4 @@
-//! Parsers for programs, declarations, and procedures..
+//! Parsers for programs, declarations, and procedures.
 
 use pest::{
     iterators::{Pair, Pairs},
@@ -7,7 +7,7 @@ use pest::{
 
 use super::{
     super::language::ast::{program, Identifier},
-    call, constraint, stm, utils, view, Rule,
+    call, constraint, stm, utils, var, view, Rule,
 };
 
 /// Type of program as parsed by the parser.
@@ -32,6 +32,7 @@ pub fn decl(pair: Pair<Rule>) -> Decl {
     utils::match_rule!(pair {
         constraint_decl => Decl::Constraint(constraint::decl(pair.into_inner())),
         procedure_decl => Decl::Procedure(procedure(pair.into_inner())),
+        var_decl => Decl::Var(var::decl(pair.into_inner())),
         view_decl => Decl::View(view::decl::parse(pair.into_inner()))
     })
 }
@@ -43,6 +44,6 @@ pub type Procedure<'inp> = program::Procedure<'inp, Option<Span<'inp>>, Identifi
 fn procedure(pairs: Pairs<Rule>) -> program::Procedure<Option<Span>, Identifier> {
     utils::match_rules!(pair in pairs, proc : Procedure {
         prototype => proc.prototype = utils::lift_many(pair, call::prototype),
-        stm_list => proc.body = stm::list(pair.into_inner())
+        block => proc.body = stm::block(utils::one_inner(pair))
     })
 }

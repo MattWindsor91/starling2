@@ -3,14 +3,14 @@
 //
 
 /// A program.
-program = {
-    SOI
-    ~ ^"program" ~ identifier ~ ";"
-    ~ (decl ~ ";")*
-    ~ ^"begin"
-    ~ ^"end."
-    ~ EOI
-}
+program =
+  { SOI
+  ~ ^"program" ~ identifier ~ ";"
+  ~ (decl ~ ";")*
+  ~ ^"begin"
+  ~ ^"end."
+  ~ EOI
+  }
 
 
 //
@@ -18,11 +18,12 @@ program = {
 //
 
 /// A top-level declaration.
-decl = {
-    constraint_decl
-    | procedure_decl
-    | view_decl
-}
+decl =
+  { constraint_decl  // Declares constraints.
+  | procedure_decl   // Declares procedures.
+  | var_decl         // Declares variables.
+  | view_decl        // Declares view atoms.
+  }
 
 
 //
@@ -30,53 +31,56 @@ decl = {
 //
 
 /// A constraint declaration.
-constraint_decl = {
-    ^"constraint"
-    ~ view_pattern ~ ("," ~ view_pattern)*
-    ~ constraint
-}
+constraint_decl =
+  { ^"constraint"
+  ~ view_pattern
+  ~ ("," ~ view_pattern)*
+  ~ constraint
+  }
 
 // The body of a constraint.
-constraint = {
-    entails_constraint
-}
+constraint =
+  { entails_constraint
+  }
 
 // A constraint that maps a view pattern to a Boolean expression.
-entails_constraint = {
-    ^"entails" ~ expr
-}
+entails_constraint = { ^"entails" ~ expr }
 
 
 //
 // View patterns
 //
 
-view_pattern = {
-    empty_view
-    | (view_pattern_atom ~ ("*" ~ view_pattern_atom)*)
-}
+view_pattern =
+  { empty_view
+  | (view_pattern_atom ~ ("*" ~ view_pattern_atom)*)
+  }
 
-view_pattern_atom = {
-    identifier ~ view_pattern_argument_list? ~ iterator_pattern?
-}
+view_pattern_atom =
+  { identifier
+  ~ view_pattern_argument_list?
+  ~ iterator_pattern?
+  }
 
 /// A view argument pattern list.
-view_pattern_argument_list = {
-    "("
-    ~ view_pattern_argument
-    ~ ("," ~ view_pattern_argument)*
-    ~ ")"
-}
+view_pattern_argument_list =
+  { "("
+  ~ view_pattern_argument
+  ~ ("," ~ view_pattern_argument)*
+  ~ ")"
+  }
 
 /// A view iterator pattern.
-iterator_pattern = {
-    "[" ~ view_pattern_argument ~ "]"
-}
+iterator_pattern =
+  { "["
+  ~ view_pattern_argument
+  ~ "]"
+  }
 
-view_pattern_argument = _{
-    wildcard
-    | expr
-}
+view_pattern_argument =
+ _{ wildcard
+  | expr
+  }
 
 wildcard = { "_" }
 empty_view = { ^"emp" }
@@ -91,116 +95,134 @@ view_assertion = !{
     view_prefix* ~ view_primary~ view_postfix* ~ (view_infix ~ view_prefix* ~ view_primary~ view_postfix* )*
 }
 
-view_prefix = _{
-    view_guard
-}
+view_prefix =
+ _{ view_guard
+  }
 view_guard = { "[" ~ expr ~ "]" }
 
-view_infix = _{
-    view_join   // Joining of two views.
-    | view_ite  // If-then-else.
-}
+view_infix =
+ _{ view_join  // Joining of two views.
+  | view_ite   // If-then-else.
+  }
 view_join = { "*" }
 view_ite  = { "<[" ~ condition ~ "]>" }
 
-view_postfix = _{
-    view_iterate
-}
+view_postfix =
+ _{ view_iterate
+  }
 view_iterate = { "[" ~ expr ~ "]" }
 
-view_primary = _{
-    "(" ~ view_assertion ~ ")"  // Bracketed view.
-    | "@(" ~ expr ~ ")"         // Local assertion.
-    | empty_view                // Empty view.
-    | call                      // View assertion atom.
-}
+view_primary =
+ _{ ("(" ~ view_assertion ~ ")")  // Bracketed view.
+  | ("@(" ~ expr ~ ")")           // Local assertion.
+  | empty_view                    // Empty view.
+  | call                          // View assertion atom.
+  }
+
 
 //
 // View decls
 //
 
 // A decl for one or more view atoms.
-view_decl = {
-    ^"view"
-    ~ prototype ~ (";" ~ prototype)*
-}
+view_decl =
+  { ^"view"
+  ~ prototype
+  ~ (";" ~ prototype)*
+  }
+
+
+//
+// Variable decls
+//
+
+var_decl =
+  { var_scope
+  ~ parameter
+  ~ (";" ~ parameter)*
+  }
+
+var_scope =
+  { shared_scope
+  | thread_scope
+  }
+shared_scope = { ^"var" }
+thread_scope = { ^"threadvar" }
 
 //
 // Procedure decls
 //
 
-procedure_decl = {
-    "procedure"
-    ~ prototype
-    ~ ";"
-    ~ "begin"
-    ~ stm_list
-    ~ "end"
-}
+procedure_decl =
+  { ^"procedure"
+  ~ prototype
+  ~ ";"
+  ~ block
+  }
 
 
 //
 // Function and view prototypes
 //
 
-prototype = {
-    identifier ~ parameter_list?
-}
+prototype = { identifier ~ parameter_list? }
 
-parameter_list = _{
-    "("
-    ~ (parameter ~ ("," ~ parameter)*)?
-    ~ ")"
-}
+parameter_list =
+ _{ "("
+  ~ (parameter ~ ("," ~ parameter)*)?
+  ~ ")"
+  }
 
-parameter = {
-    identifier ~ ":" ~ starling_type
-}
+parameter =
+  { identifier
+  ~ ":"
+  ~ starling_type
+  }
 
 
 //
 // Types
 //
 
-starling_type = {
-    primitive_type
-    | identifier
-    | refinement_type
-    | array_type
-}
+starling_type =
+  { primitive_type
+  | identifier
+  | refinement_type
+  | array_type
+  }
 
 // A refinement type, of the form "{x : T | P(x)}".
-refinement_type = {
-    "{"
-    ~ identifier
-    ~ ":"
-    ~ starling_type
-    ~ "|"
-    ~ expr
-}
+refinement_type =
+  { "{"
+  ~ identifier
+  ~ ":"
+  ~ starling_type
+  ~ "|"
+  ~ expr
+  }
 
 /// An array type.
-array_type = {
-    "array"
-    ~ "["
-    ~ array_bound
-    ~ "]"
-    ~ "of"
-    ~ starling_type
-}
+array_type =
+  { ^"array"
+  ~ "["
+  ~ array_bound
+  ~ "]"
+  ~ ^"of"
+  ~ starling_type
+  }
 
 /// Bounds for an array type.
-array_bound = {
-    int_literal
-    ~ ".."
-    ~ int_literal
-}
+array_bound =
+  { int_literal
+  ~ ".."
+  ~ int_literal
+  }
 
 /// A primitive type.
-primitive_type = {
-    boolean_type
-    | integer_type
-}
+primitive_type =
+  { boolean_type
+  | integer_type
+  }
 boolean_type = { ^"boolean" }
 integer_type = { ^"integer" }
 
@@ -210,53 +232,66 @@ integer_type = { ^"integer" }
 //
 
 /// A semicolon-separated (Pascal-style) list of statements.
-stm_list = {
-    (stm_triple ~ (";" ~ stm_triple)*)?
-}
+stm_list =
+  { stm_triple
+  ~ (";" ~ stm_triple)*
+  }
 
 /// A statement that is optionally surrounded with view expressions.
-stm_triple = {
-    triple_view_assertion? ~ stm ~ triple_view_assertion?
-}
+stm_triple =
+  { triple_view_assertion?
+  ~ stm
+  ~ triple_view_assertion?
+  }
 
 /// A view assertion within a triple.
-triple_view_assertion = _{
-    "{" ~ view_assertion ~ "}"
-}
+triple_view_assertion =
+ _{ "{"
+  ~ view_assertion
+  ~ "}"
+  }
 
 /// A statement.
-stm = {
-      atomic_stm // Atomic block statement
-    | assign     // Assignment statement
-    | block      // Block statement
-    | call       // Procedure call
-    | ite_stm    // If-then-else
-    | nop_stm    // No-operation
-}
+stm =
+  { atomic_stm // Atomic block statement
+  | assign     // Assignment statement
+  | block      // Block statement
+  | call       // Procedure call
+  | ite_stm    // If-then-else
+  | nop_stm    // No-operation
+  }
 
 /// An assignment statement.
-assign = {
-    expr ~ ":=" ~ expr
-}
+assign =
+  { expr
+  ~ ":="
+  ~ expr
+  }
 
 /// A non-atomic block statement.
-block = {
-    "begin" ~ stm_list ~ "end"
-}
+block =
+  { ^"begin"
+  ~ stm_list?
+  ~ ^"end"
+  }
 
 /// An if-then-else statement.
 ///
 /// An ITE switches between two statements based on the value of its expression.
 /// To nest multiple statements inside a branch, or inject triples, use blocks.
-ite_stm = {
-    "if" ~ condition ~ "then" ~ stm ~ ("else" ~ stm)?
-}
+ite_stm =
+  { ^"if"
+  ~ condition
+  ~ ^"then"
+  ~ stm
+  ~ (^"else" ~ stm)?
+  }
 
 /// An if-then-else condition.
-condition = {
-    nondeterminism |
-    expr
-}
+condition =
+  { nondeterminism
+  | expr
+  }
 nondeterminism = { "*" }
 
 nop_stm = { ^"nop" }
@@ -266,10 +301,10 @@ nop_stm = { ^"nop" }
 /// There are two forms of atomic block statement syntax: one that uses keywords in
 /// the typical Pascal style, and another that uses angle brackets in an
 /// approximation of typical proof script style.
-atomic_stm = {
-    ("<|" ~ stm_list ~ "|>")
-    | (^"atomic" ~ stm_list ~ ^"end")
-}
+atomic_stm =
+  { ("<|" ~ stm_list ~ "|>")
+  | (^"atomic" ~ stm_list ~ ^"end")
+  }
 
 
 //
@@ -323,16 +358,14 @@ deref     =   { "^" }
 primary  =  _{ literal | identifier | "(" ~ expr ~ ")" }
 
 /// A procedure call (or similar syntactic element).
-call = {
-    identifier ~ argument_list?
-}
+call = { identifier ~ argument_list? }
 
-argument_list = {
-    "("
-    ~ expr
-    ~ ("," ~ expr)*
-    ~ ")"
-}
+argument_list =
+  { "("
+  ~ expr
+  ~ ("," ~ expr)*
+  ~ ")"
+  }
 
 
 //
@@ -341,45 +374,46 @@ argument_list = {
 
 // Any type of literal.
 literal =
-    { bool_literal
-    | int_literal
-    }
+  { bool_literal
+  | int_literal
+  }
 
-// Boolean literal (case-insensitive true or false).
+/// Boolean literal (case-insensitive true or false).
 bool_literal  = { true_literal | false_literal }
 true_literal  = { ^"true" }
 false_literal = { ^"false" }
 
-// Integer literal (decimal number, possibly with a sign).
+/// Integer literal (decimal number, possibly with a sign).
 int_literal = @{ ASCII_DIGIT+ }
 
-// An identifier.
+/// An identifier.
 identifier = @{ (!keyword) ~ XID_START ~ (XID_CONTINUE)* }
 
-// A keyword, forbidden as an identifier.
-keyword = _{
-    // TODO(MattWindsor91): conditional keywords?
-    ^"begin" |
-    ^"else" |
-    ^"end" |
-    ^"end." |
-    ^"constraint" |
-    ^"if" |
-    ^"procedure" |
-    ^"program" |
-    ^"then" |
-    ^"var" |
-    ^"view" |
+/// A keyword, forbidden as an identifier.
+keyword = // TODO(MattWindsor91): conditional keywords?
+ _{ ^"array"
+  | ^"begin"
+  | ^"else"
+  | ^"end"
+  | ^"end."
+  | ^"constraint"
+  | ^"if"
+  | ^"of"
+  | ^"procedure"
+  | ^"program"
+  | ^"then"
+  | ^"view"
     // Terminals that contain keywords:
-    bool_literal |
-    bool_op |
-    empty_view |
-    int_div |
-    modulus |
-    nop_stm |
-    not |
-    primitive_type
-}
+  | bool_literal
+  | bool_op
+  | empty_view
+  | int_div
+  | modulus
+  | nop_stm
+  | not
+  | primitive_type
+  | var_scope
+  }
 
 
 //

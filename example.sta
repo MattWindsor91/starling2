@@ -1,10 +1,12 @@
 program Arc;
 
-(* shared bool free;
-shared int count;
+var
+    free : Boolean;
+    count : Integer;
 
-thread bool f;
-thread int c; *)
+threadvar
+    f : Boolean;
+    c : Integer;
 
 view
     Arc;
@@ -12,7 +14,9 @@ view
 
 procedure Clone;
 begin
-  { Arc } <| Inc(count) |> { Arc[2] }
+  { Arc }
+    <| Inc(count) |>
+  { Arc[2] }
 end;
 
 procedure Print;

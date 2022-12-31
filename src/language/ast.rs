@@ -19,5 +19,6 @@ pub mod ite;
 pub mod program;
 pub mod stm;
 pub mod typing;
+pub mod var;
 pub mod variable;
 pub mod view;
