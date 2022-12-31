@@ -1,7 +1,6 @@
 //! Constraint bodies.
 
-use super::{super::tagged::Tagged, expr, view};
-use crate::language::ast::view::pattern;
+use super::{super::tagged::Tagged, expr, view::pattern};
 
 /// A constraint declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]

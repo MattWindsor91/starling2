@@ -4,10 +4,7 @@ pub mod assertion;
 pub mod decl;
 pub mod pattern;
 
-use pest::{
-    iterators::{Pair, Pairs},
-    Span,
-};
+use pest::{iterators::Pair, Span};
 
 use super::{
     super::language::ast::{view, Identifier},

@@ -1,9 +1,6 @@
 //! Parsers for types.
 
-use pest::{
-    iterators::{Pair, Pairs},
-    Span,
-};
+use pest::{iterators::Pair, Span};
 
 use super::{
     super::language::ast::{typing, Identifier},

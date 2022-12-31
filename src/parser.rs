@@ -1,13 +1,13 @@
 //! Top-level of the Starling parser.
 
-use pest::{iterators::Pairs, Parser, Span};
+use pest::Parser;
 
 use super::language::{ast, tagged::Spanned};
 
 mod call;
 mod constraint;
-mod decl;
 mod expr;
+mod program;
 mod stm;
 mod typing;
 mod utils;
@@ -18,31 +18,15 @@ mod view;
 #[grammar = "parser/starling.pest"]
 struct StarlingParser;
 
-/// Type of program as parsed by the parser.
-pub type Program<'inp> = ast::Program<'inp, Option<Span<'inp>>, ast::Identifier<'inp>>;
-
 /// Parses a program.
 ///
 /// # Errors
 ///
 /// Fails if `input` could not be parsed correctly.
-pub fn parse(input: &str) -> Result<Spanned<Program>> {
+pub fn parse(input: &str) -> Result<Spanned<program::Program>> {
     let pairs = StarlingParser::parse(Rule::program, input).map_err(Box::new)?;
     let pair = utils::one(pairs);
-
-    let span = pair.as_span();
-
-    let program = program(pair.into_inner());
-
-    Ok(Spanned::new(Some(span), program))
-}
-
-fn program(pairs: Pairs<Rule>) -> Program {
-    utils::match_rules!(pair in pairs, prog: Program {
-        identifier => prog.name = utils::spanned_id(&pair),
-        decl => prog.decls.push(utils::lift_one(pair, decl::parse)),
-        EOI => ()
-    })
+    Ok(utils::lift_many(pair, program::parse))
 }
 
 /// Errors returned by the Starling parser.
