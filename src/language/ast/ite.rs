@@ -1,6 +1,6 @@
 //! If-then-else over AST expressions.
 
-use super::{super::ite, Expr};
+use super::super::{expr::Expr, ite};
 
 /// Type of if-then-else constructs over AST expressions.
 pub type Ite<'inp, M, V, B> = ite::Ite<M, B, Expr<'inp, M, V>>;

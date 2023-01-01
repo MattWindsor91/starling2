@@ -1,6 +1,6 @@
 //! AST nodes for variables.
 
-use super::{super::tagged::Tagged, call::Parameter};
+use super::{super::{tagged::Tagged, var::Scope}, call::Parameter};
 
 /// A variable declaration.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -21,15 +21,4 @@ impl<'inp, M: Default, V> Default for Decl<'inp, M, V> {
             vars: vec![],
         }
     }
-}
-
-/// A variable scope.
-#[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
-#[non_exhaustive]
-pub enum Scope {
-    /// Shared scope.
-    #[default]
-    Shared,
-    /// Thread-local scope.
-    Thread,
 }

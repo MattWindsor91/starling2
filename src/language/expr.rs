@@ -6,7 +6,7 @@ pub use bop::Bop;
 pub use literal::Literal;
 pub use uop::Uop;
 
-use super::super::tagged;
+use super::tagged;
 
 pub mod bop;
 pub mod literal;

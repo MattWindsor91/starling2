@@ -1,6 +1,9 @@
 //! Statements.
 
-use super::{super::tagged::Tagged, call, expr, ite, view};
+use super::{
+    super::{expr, tagged::Tagged},
+    call, ite, view,
+};
 
 /// A list of statement triples.
 pub type List<'inp, M, V> = Vec<Tagged<M, Triple<'inp, M, V>>>;

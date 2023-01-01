@@ -4,7 +4,7 @@ pub use assertion::Assertion;
 pub use decl::Decl;
 pub use pattern::Pattern;
 
-use super::super::{tagged::Tagged, Expr};
+use super::super::{expr::Expr, tagged::Tagged};
 
 pub mod assertion;
 pub mod decl;

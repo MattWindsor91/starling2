@@ -3,7 +3,7 @@
 use pest::{iterators::Pair, Span};
 
 use super::{
-    super::language::ast::{typing, Identifier},
+    super::language::{ast::Identifier, typing},
     utils, Rule,
 };
 

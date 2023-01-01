@@ -6,7 +6,10 @@ use pest::{
 };
 
 use super::{
-    super::language::ast::{var, Identifier},
+    super::language::{
+        ast::{var, Identifier},
+        var::Scope,
+    },
     call, utils, Rule,
 };
 
@@ -24,9 +27,9 @@ pub fn decl(pairs: Pairs<Rule>) -> Decl {
 
 /// Parses `pair` as a scope.
 #[must_use]
-fn scope(pair: Pair<Rule>) -> var::Scope {
+fn scope(pair: &Pair<Rule>) -> Scope {
     utils::match_rule!(pair {
-        shared_scope => var::Scope::Shared,
-        thread_scope => var::Scope::Thread
+        shared_scope => Scope::Shared,
+        thread_scope => Scope::Thread
     })
 }

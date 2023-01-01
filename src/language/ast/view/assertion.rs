@@ -2,8 +2,8 @@
 
 use super::{
     super::{
-        super::{tagged::Tagged, Expr},
-        call, expr, ite,
+        super::{expr, tagged::Tagged},
+        call, ite,
     },
     Iterated,
 };
@@ -42,7 +42,7 @@ pub enum Assertion<'inp, M, V> {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Guarded<'inp, M, V> {
     /// The guard.
-    pub guard: Expr<'inp, M, V>,
+    pub guard: expr::Expr<'inp, M, V>,
     /// The view being guarded.
     pub view: Box<Assertion<'inp, M, V>>,
 }
@@ -53,4 +53,4 @@ pub type Ite<'inp, M, V> = ite::Ite<'inp, M, V, Box<Assertion<'inp, M, V>>>;
 /// A view assertion atom.
 ///
 /// Assertion atoms in the AST do not have iterators.
-pub type Atom<'inp, M, V> = call::Generic<'inp, M, Expr<'inp, M, V>>;
+pub type Atom<'inp, M, V> = call::Generic<'inp, M, expr::Expr<'inp, M, V>>;

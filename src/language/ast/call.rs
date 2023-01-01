@@ -1,6 +1,9 @@
 //! Procedure calls and related concepts.
 
-use super::{super::tagged::Tagged, typing::Type, Identifier};
+use super::{
+    super::{expr::Expr, tagged::Tagged, typing::Type},
+    Identifier,
+};
 
 /// Generalised type of anything shaped like a procedure call, including view atoms.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -24,7 +27,7 @@ impl<'inp, M: Default, Arg> Default for Generic<'inp, M, Arg> {
 }
 
 /// Type of procedure calls (and non-iterated view atoms).
-pub type Call<'inp, M, V> = Generic<'inp, M, super::expr::Expr<'inp, M, V>>;
+pub type Call<'inp, M, V> = Generic<'inp, M, Expr<'inp, M, V>>;
 
 /// Type of procedure (and non-iterated view atom) prototypes.
 pub type Prototype<'inp, M, V> = Generic<'inp, M, Parameter<'inp, M, V>>;

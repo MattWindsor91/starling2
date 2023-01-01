@@ -1,6 +1,9 @@
 //! Constraint bodies.
 
-use super::{super::tagged::Tagged, expr, view::pattern};
+use super::{
+    super::{expr, tagged::Tagged},
+    view::pattern,
+};
 
 /// A constraint declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]

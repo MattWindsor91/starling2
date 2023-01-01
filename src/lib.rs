@@ -9,5 +9,6 @@
 
 #![warn(clippy::pedantic)]
 
+pub mod binder;
 pub mod language;
 pub mod parser;

@@ -1,6 +1,6 @@
 //! View patterns and their components.
 
-use super::super::{super::tagged::Tagged, Expr};
+use super::super::super::{expr::Expr, tagged::Tagged};
 
 /// A view pattern (list of atoms).
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -8,7 +8,7 @@ use pest::{
 };
 
 use super::{
-    super::language::ast::{expr, Identifier},
+    super::language::{ast::Identifier, expr},
     utils::{self, l_infix},
     Rule,
 };
@@ -79,7 +79,7 @@ fn postfix_op(op: &Pair<Rule>) -> expr::Uop {
 
 /// Parses infix operators.
 fn infix_op(pair: &Pair<Rule>) -> expr::Bop {
-    use expr::bop::{Arith, Bool, Bop, Rel};
+    use super::super::language::expr::bop::{Arith, Bool, Bop, Rel};
     utils::match_rule!(pair {
         add => Bop::Arith(Arith::Add),
         div => Bop::Arith(Arith::Div),
