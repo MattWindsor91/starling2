@@ -20,7 +20,7 @@ pub type Decl<'inp> = var::Decl<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 #[must_use]
 pub fn decl(pairs: Pairs<Rule>) -> Decl {
     utils::match_rules!(pair in pairs, dec: Decl {
-        var_scope => dec.scope = utils::lift_one(pair, scope),
+        var_scope => dec.scope = utils::lift_one(pair, |p| scope(&p)),
         parameter => dec.vars.push(utils::lift_many(pair, call::parameter))
     })
 }
