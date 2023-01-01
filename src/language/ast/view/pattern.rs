@@ -4,12 +4,12 @@ use super::super::super::{expr::Expr, tagged::Tagged};
 
 /// A view pattern (list of atoms).
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Pattern<'inp, M, V> {
-    pub contents: Vec<Tagged<M, Atom<'inp, M, V>>>,
+pub struct Pattern<M, V> {
+    pub contents: Vec<Tagged<M, Atom<M, V>>>,
 }
 
 /// The default view pattern is `emp`.
-impl<'inp, M, V> Default for Pattern<'inp, M, V> {
+impl<M, V> Default for Pattern<M, V> {
     fn default() -> Self {
         Self { contents: vec![] }
     }
@@ -20,17 +20,17 @@ impl<'inp, M, V> Default for Pattern<'inp, M, V> {
 /// Atom patterns are iterated, but not guarded.  We nest the iterator into the pattern because,
 /// unlike `Iterated`, the iterator can be a pattern argument.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Atom<'inp, M, V> {
+pub struct Atom<M, V> {
     /// The name of the atom.
     pub name: Tagged<M, V>,
     /// The arguments of the atom.
-    pub args: Vec<Tagged<M, Argument<'inp, M, V>>>,
+    pub args: Vec<Tagged<M, Argument<M, V>>>,
     /// The iterator.
-    pub iterator: Tagged<M, Argument<'inp, M, V>>,
+    pub iterator: Tagged<M, Argument<M, V>>,
 }
 
 /// The default atom pattern is the default name with no arguments and iterator `1`.
-impl<'inp, M: Default, V: Default> Default for Atom<'inp, M, V> {
+impl<M: Default, V: Default> Default for Atom<M, V> {
     fn default() -> Self {
         Self {
             name: Tagged::default(),
@@ -43,9 +43,9 @@ impl<'inp, M: Default, V: Default> Default for Atom<'inp, M, V> {
 /// A view argument pattern.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub enum Argument<'inp, M, V> {
+pub enum Argument<M, V> {
     /// A `_` argument.
     Wildcard,
     /// An expression used as a pattern.
-    Expr(Expr<'inp, M, V>),
+    Expr(Expr<M, V>),
 }

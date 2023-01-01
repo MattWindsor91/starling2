@@ -11,13 +11,13 @@ use super::{
 };
 
 /// Shorthand for type of constraint declarations returned by this parser.
-pub type Decl<'inp> = constraint::Decl<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Decl<'inp> = constraint::Decl<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for type of constraint bodies returned by this parser.
-pub type Constraint<'inp> = constraint::Constraint<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Constraint<'inp> = constraint::Constraint<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for type of entailment bodies returned by this parser.
-pub type Entailment<'inp> = constraint::Entailment<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Entailment<'inp> = constraint::Entailment<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses a constraint declaration from a list of pairs.
 #[must_use]

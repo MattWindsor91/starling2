@@ -11,20 +11,20 @@ use super::{typing, var};
 ///
 /// This structure contains an entire
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Program<'ast, M> {
+pub struct Program<M> {
     /// Named types defined in this program.
-    pub types: HashMap<Symbol, Type<'ast, M>>,
+    pub types: HashMap<Symbol, Type<M>>,
     /// Variables defined in this program.
     pub variables: HashMap<Symbol, Var<M>>,
 }
 
 /// A type record.
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Type<'ast, M> {
+pub struct Type<M> {
     /// The origin of the type.
     pub origin: Origin<M>,
     /// The definition of the type.
-    pub ty: typing::Type<'ast, M, Symbol>,
+    pub ty: typing::Type<M, Symbol>,
 }
 
 /// Information about where some semantic element originated from.

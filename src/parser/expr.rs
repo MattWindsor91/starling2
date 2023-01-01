@@ -36,7 +36,7 @@ fn init() -> PrattParser<Rule> {
 }
 
 /// Shorthand for type of expressions returned by this parser.
-pub type Expr<'inp> = expr::Expr<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Expr<'inp> = expr::Expr<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses an expression.
 ///
@@ -116,22 +116,9 @@ fn literal(pair: Pair<Rule>) -> Expr {
 /// # Panics
 ///
 /// Panics if the upstream parser sent us an integer literal that is badly formed.
-fn int(inp: &str) -> expr::literal::Int {
-    match inp.parse() {
-        Ok(i) => expr::literal::Int::I64(i),
-        Err(err)
-            if matches!(
-                err.kind(),
-                std::num::IntErrorKind::NegOverflow | std::num::IntErrorKind::PosOverflow
-            ) =>
-        {
-            expr::literal::Int::Big(inp)
-        }
-        Err(_) => unreachable!(
-            "parser should have disallowed erroneous integer input {:?}",
-            inp
-        ),
-    }
+fn int(inp: &str) -> num_bigint::BigInt {
+    inp.parse()
+        .expect("parser should have disallowed erroneous integer input")
 }
 
 /// Parses a Boolean.

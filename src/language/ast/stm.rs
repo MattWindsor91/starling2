@@ -54,7 +54,7 @@ impl<'inp, M: Default, V> Default for Triple<'inp, M, V> {
 #[non_exhaustive]
 pub enum Stm<'inp, M, V> {
     /// An assignment statement.
-    Assign(Assign<'inp, M, V>),
+    Assign(Assign<M, V>),
     /// An atomic block statement.
     ///
     /// The semantics of an atomic statement is that all of the statements contained within are
@@ -85,17 +85,17 @@ pub enum Stm<'inp, M, V> {
 /// of assignment.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct Assign<'inp, M, V> {
+pub struct Assign<M, V> {
     /// The expression corresponding to the location to receive the value.
     ///
     /// If `None`, then the expression is evaluated and discarded.
-    pub lvalue: Option<expr::Tagged<'inp, M, V>>,
+    pub lvalue: Option<expr::Tagged<M, V>>,
     /// The expression corresponding to the value to be assigned.
-    pub rvalue: expr::Tagged<'inp, M, V>,
+    pub rvalue: expr::Tagged<M, V>,
 }
 
 /// The default assignment discards 0.
-impl<'inp, M: Default, V> Default for Assign<'inp, M, V> {
+impl<M: Default, V> Default for Assign<M, V> {
     fn default() -> Self {
         Self {
             lvalue: None,
@@ -105,4 +105,4 @@ impl<'inp, M: Default, V> Default for Assign<'inp, M, V> {
 }
 
 /// Type of if-then-else statements.
-pub type Ite<'inp, M, V> = ite::Ite<'inp, M, V, Tagged<M, Box<Stm<'inp, M, V>>>>;
+pub type Ite<'inp, M, V> = ite::Ite<M, V, Tagged<M, Box<Stm<'inp, M, V>>>>;

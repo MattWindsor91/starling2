@@ -12,7 +12,7 @@ use super::{
 };
 
 /// Shorthand for the type of iterated views/atoms parsed by `iterate`.
-pub type Iterated<'inp, T> = view::Iterated<'inp, Option<Span<'inp>>, Identifier<'inp>, T>;
+pub type Iterated<'inp, T> = view::Iterated<Option<Span<'inp>>, Identifier<'inp>, T>;
 
 /// Parses a view iterator from `pair`, wrapping `item` within it.
 #[must_use]

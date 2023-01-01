@@ -11,13 +11,13 @@ use super::super::{
 };
 
 /// Shorthand for the type of pattern produced by the parser.
-pub type Pattern<'inp> = pattern::Pattern<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Pattern<'inp> = pattern::Pattern<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for the type of pattern atom produced by the parser.
-pub type Atom<'inp> = pattern::Atom<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Atom<'inp> = pattern::Atom<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for the type of pattern argument produced by the parser.
-pub type Argument<'inp> = pattern::Argument<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Argument<'inp> = pattern::Argument<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses a view pattern given the `pairs` over its contents.
 #[must_use]

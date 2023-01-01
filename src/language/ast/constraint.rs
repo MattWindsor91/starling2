@@ -8,14 +8,14 @@ use super::{
 /// A constraint declaration.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct Decl<'inp, M, V> {
+pub struct Decl<M, V> {
     /// List of views that are bound by this constraint.
-    pub views: Vec<Tagged<M, pattern::Pattern<'inp, M, V>>>,
+    pub views: Vec<Tagged<M, pattern::Pattern<M, V>>>,
     /// Body of the constraint.
-    pub body: Tagged<M, Constraint<'inp, M, V>>,
+    pub body: Tagged<M, Constraint<M, V>>,
 }
 
-impl<'inp, M: Default, V> Default for Decl<'inp, M, V> {
+impl<M: Default, V> Default for Decl<M, V> {
     fn default() -> Self {
         Self {
             views: vec![],
@@ -27,21 +27,21 @@ impl<'inp, M: Default, V> Default for Decl<'inp, M, V> {
 /// The body of a constraint.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub enum Constraint<'inp, M, V> {
+pub enum Constraint<M, V> {
     /// An entailment constraint body.
-    Entails(Entailment<'inp, M, V>),
+    Entails(Entailment<M, V>),
 }
 
 /// A constraint body that maps a view pattern to a Boolean expression.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
-pub struct Entailment<'inp, M, V> {
+pub struct Entailment<M, V> {
     /// The expression entailed by the constraint.
-    pub entails: Tagged<M, expr::Expr<'inp, M, V>>,
+    pub entails: Tagged<M, expr::Expr<M, V>>,
 }
 
 /// The default entailment constraint is 'true'.
-impl<'inp, M: Default, V> Default for Entailment<'inp, M, V> {
+impl<M: Default, V> Default for Entailment<M, V> {
     fn default() -> Self {
         Self {
             entails: Tagged::with_default(expr::Expr::bool(true)),

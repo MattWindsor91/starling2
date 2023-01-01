@@ -27,7 +27,7 @@ impl<'inp, M: Default, Arg> Default for Generic<'inp, M, Arg> {
 }
 
 /// Type of procedure calls (and non-iterated view atoms).
-pub type Call<'inp, M, V> = Generic<'inp, M, Expr<'inp, M, V>>;
+pub type Call<'inp, M, V> = Generic<'inp, M, Expr<M, V>>;
 
 /// Type of procedure (and non-iterated view atom) prototypes.
 pub type Prototype<'inp, M, V> = Generic<'inp, M, Parameter<'inp, M, V>>;
@@ -39,7 +39,7 @@ pub struct Parameter<'inp, M, V> {
     /// Name of the parameter.
     pub name: Tagged<M, Identifier<'inp>>,
     /// Type of the parameter.
-    pub ty: Tagged<M, Type<'inp, M, V>>,
+    pub ty: Tagged<M, Type<M, V>>,
 }
 
 /// The default parameter has integer type and a default name.

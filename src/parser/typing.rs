@@ -8,7 +8,7 @@ use super::{
 };
 
 /// Shorthand for the type of type parsed by `starling_type`.
-pub type Type<'inp> = typing::Type<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Type<'inp> = typing::Type<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses `pair` as a Starling type.
 #[must_use]

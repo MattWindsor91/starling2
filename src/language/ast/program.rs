@@ -30,7 +30,7 @@ impl<'inp, M: Default, V> Default for Program<'inp, M, V> {
 #[non_exhaustive]
 pub enum Decl<'inp, M, V> {
     /// A constraint declaration.
-    Constraint(constraint::Decl<'inp, M, V>),
+    Constraint(constraint::Decl<M, V>),
     /// A procedure declaration.
     Procedure(Procedure<'inp, M, V>),
     /// A variable declaration.

@@ -18,21 +18,21 @@ pub use refined::Refined;
 /// It is non-exhaustive, as the set of types in Starling is subject to future expansion.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
-pub enum Type<'inp, M, V> {
+pub enum Type<M, V> {
     /// An array type.
-    Array(Array<'inp, M, V>),
+    Array(Array<M, V>),
     /// A refined type.
-    Refined(Refined<'inp, M, V>),
+    Refined(Refined<M, V>),
     /// A primitive type.
     Prim(Prim),
 }
 
-impl<'inp, M, V> Type<'inp, M, V> {
+impl<M, V> Type<M, V> {
     /// The integer primitive type.
     pub const INT: Self = Type::Prim(Prim::Int);
 }
 
-impl<'inp, M, V: Display> Display for Type<'inp, M, V> {
+impl<M, V: Display> Display for Type<M, V> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Array(a) => a.fmt(f),

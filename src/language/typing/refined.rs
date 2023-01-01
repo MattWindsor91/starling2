@@ -4,16 +4,16 @@ use std::fmt::{Display, Formatter};
 
 /// Base structure of a refined type.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Refined<'inp, M, V> {
+pub struct Refined<M, V> {
     /// The type being refined.
-    element: Box<super::Type<'inp, M, V>>,
+    element: Box<super::Type<M, V>>,
     /// The refinement variable.
     var: String,
     /// The refinement predicate (over `var`).
-    refinement: super::super::expr::Expr<'inp, M, V>,
+    refinement: super::super::expr::Expr<M, V>,
 }
 
-impl<'inp, M, V: Display> Display for Refined<'inp, M, V> {
+impl<'inp, M, V: Display> Display for Refined<M, V> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let Self {
             element,

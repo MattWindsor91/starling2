@@ -21,13 +21,13 @@ pub type Triple<'inp> = stm::Triple<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 pub type Stm<'inp> = stm::Stm<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for type of assignments returned by the parser.
-pub type Assign<'inp> = stm::Assign<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Assign<'inp> = stm::Assign<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for type of if-then-else returned by the parser.
 pub type Ite<'inp> = stm::Ite<'inp, Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Shorthand for type of condition returned by the parser.
-pub type Condition<'inp> = ite::Condition<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Condition<'inp> = ite::Condition<Option<Span<'inp>>, Identifier<'inp>>;
 
 /// Parses `pairs` as a list of triples.
 #[must_use]

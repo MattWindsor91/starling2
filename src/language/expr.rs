@@ -9,30 +9,28 @@ pub use uop::Uop;
 use super::tagged;
 
 pub mod bop;
+mod egg;
 pub mod literal;
 pub mod uop;
 
 /// The body of an expression, parameterised over tags and variables.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Expr<'inp, M, V> {
+pub enum Expr<M, V> {
     /// Literal expression.
-    Literal(tagged::Tagged<M, Literal<'inp>>),
+    Literal(tagged::Tagged<M, Literal>),
     /// Variable reference.
     Var(tagged::Tagged<M, V>),
     /// Binary (infix) operation.
     Bop {
         op: Bop,
-        lhs: Box<Expr<'inp, M, V>>,
-        rhs: Box<Expr<'inp, M, V>>,
+        lhs: Box<Expr<M, V>>,
+        rhs: Box<Expr<M, V>>,
     },
     /// Unary (prefix or postfix) operation.
-    Uop {
-        op: Uop,
-        expr: Box<Expr<'inp, M, V>>,
-    },
+    Uop { op: Uop, expr: Box<Expr<M, V>> },
 }
 
-impl<'inp, M, V> Expr<'inp, M, V> {
+impl<M, V> Expr<M, V> {
     /// Convenience constructor for a binary operation.
     #[must_use]
     pub fn bop(lhs: impl Into<Box<Self>>, op: Bop, rhs: impl Into<Box<Self>>) -> Self {
@@ -59,7 +57,7 @@ impl<'inp, M, V> Expr<'inp, M, V> {
     }
 }
 
-impl<'inp, M: Default, V> Expr<'inp, M, V> {
+impl<M: Default, V> Expr<M, V> {
     /// Convenience constructor for a Boolean literal with no tag.
     #[must_use]
     pub fn bool(value: bool) -> Self {
@@ -70,12 +68,12 @@ impl<'inp, M: Default, V> Expr<'inp, M, V> {
     #[must_use]
     pub fn i64(value: i64) -> Self {
         Self::Literal(tagged::Tagged::with_default(Literal::Int(
-            literal::Int::I64(value),
+            num_bigint::BigInt::from(value),
         )))
     }
 }
 
-impl<'inp, M, V: Display> Display for Expr<'inp, M, V> {
+impl<M, V: Display> Display for Expr<M, V> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Literal(l) => l.fmt(f),
@@ -91,4 +89,4 @@ impl<'inp, M, V: Display> Display for Expr<'inp, M, V> {
 }
 
 /// A tagged expression.
-pub type Tagged<'inp, M, V> = tagged::Tagged<M, Expr<'inp, M, V>>;
+pub type Tagged<M, V> = tagged::Tagged<M, Expr<M, V>>;
