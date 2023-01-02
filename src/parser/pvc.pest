@@ -1,3 +1,5 @@
+//! Pascal with Views and Concurrency (PVC).
+
 //
 // Top-level
 //
@@ -38,12 +40,12 @@ constraint_decl =
   ~ constraint
   }
 
-// The body of a constraint.
+/// The body of a constraint.
 constraint =
   { entails_constraint
   }
 
-// A constraint that maps a view pattern to a Boolean expression.
+/// A constraint that maps a view pattern to a Boolean expression.
 entails_constraint = { ^"entails" ~ expr }
 
 
@@ -124,7 +126,7 @@ view_primary =
 // View decls
 //
 
-// A decl for one or more view atoms.
+/// A decl for one or more view atoms.
 view_decl =
   { ^"view"
   ~ prototype
@@ -165,14 +167,15 @@ procedure_decl =
 // Function and view prototypes
 //
 
+/// A function or view prototype.
 prototype = { identifier ~ parameter_list? }
-
 parameter_list =
  _{ "("
   ~ (parameter ~ ("," ~ parameter)*)?
   ~ ")"
   }
 
+/// A parameter (or variable declaration), in the form 'x : Integer'.
 parameter =
   { identifier
   ~ ":"
@@ -191,7 +194,7 @@ starling_type =
   | array_type
   }
 
-// A refinement type, of the form "{x : T | P(x)}".
+/// A refinement type, of the form "{x : T | P(x)}".
 refinement_type =
   { "{"
   ~ identifier
@@ -319,12 +322,12 @@ expr = !{ prefix* ~ primary~ postfix* ~ (infix ~ prefix* ~ primary~ postfix* )* 
 
 infix =  _{ arith_op | bool_op | rel_op }
 
-arith_op = _{ add | sub | mul | div | int_div | modulus }
+arith_op = _{ add | sub | mul | div | modulus }
 add      =  { "+" }
 sub      =  { "-" }
 mul      =  { "*" }
-div      =  { "/" }
-int_div  =  { ^"div" }
+// We don't support real division here yet.
+div      =  { ^"div" }
 modulus  =  { ^"mod" }
 
 bool_op  = _{ and | or | implies | iff }
@@ -406,8 +409,8 @@ keyword = // TODO(MattWindsor91): conditional keywords?
     // Terminals that contain keywords:
   | bool_literal
   | bool_op
+  | div
   | empty_view
-  | int_div
   | modulus
   | nop_stm
   | not

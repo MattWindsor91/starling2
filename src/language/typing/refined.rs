@@ -13,7 +13,7 @@ pub struct Refined<M, V> {
     refinement: super::super::expr::Expr<M, V>,
 }
 
-impl<'inp, M, V: Display> Display for Refined<M, V> {
+impl<M, V: Display> Display for Refined<M, V> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let Self {
             element,

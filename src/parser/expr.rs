@@ -25,11 +25,7 @@ fn init() -> PrattParser<Rule> {
             | l_infix(Rule::greater)
             | l_infix(Rule::greater_eq))
         .op(l_infix(Rule::add) | l_infix(Rule::sub) | l_infix(Rule::or))
-        .op(l_infix(Rule::mul)
-            | l_infix(Rule::div)
-            | l_infix(Rule::int_div)
-            | l_infix(Rule::modulus)
-            | l_infix(Rule::and))
+        .op(l_infix(Rule::mul) | l_infix(Rule::div) | l_infix(Rule::modulus) | l_infix(Rule::and))
         .op(l_infix(Rule::implies) | l_infix(Rule::iff))
         .op(Op::prefix(Rule::not) | Op::prefix(Rule::minus) | Op::prefix(Rule::plus))
         .op(Op::postfix(Rule::subscript))
@@ -84,7 +80,6 @@ fn infix_op(pair: &Pair<Rule>) -> expr::Bop {
         add => Bop::Arith(Arith::Add),
         div => Bop::Arith(Arith::Div),
         modulus => Bop::Arith(Arith::Modulus),
-        int_div => Bop::Arith(Arith::IntDiv),
         sub => Bop::Arith(Arith::Sub),
         mul => Bop::Arith(Arith::Mul),
         and => Bop::Bool(Bool::And),
@@ -105,8 +100,8 @@ fn literal(pair: Pair<Rule>) -> Expr {
     Expr::Literal(utils::spanned(
         pair.as_span(),
         utils::match_rule!(pair {
-            int_literal => expr::Literal::Int(int(pair.as_str())),
-            bool_literal => expr::Literal::Bool(bool(&utils::one_inner(pair)))
+            int_literal => expr::Constant::Int(int(pair.as_str())),
+            bool_literal => expr::Constant::Bool(bool(&utils::one_inner(pair)))
         }),
     ))
 }

@@ -784,6 +784,7 @@ dependencies = [
  "eyre",
  "itertools",
  "num-bigint",
+ "num-traits",
  "once_cell",
  "pest",
  "pest_derive",

@@ -3,12 +3,14 @@
 //! Starling has a refinement type system based on a handful of primitive types.
 
 pub mod array;
+pub mod error;
 pub mod prim;
 pub mod refined;
 
 use std::fmt::{Display, Formatter};
 
 pub use array::Array;
+pub use error::{Error, Result};
 pub use prim::Prim;
 pub use refined::Refined;
 
@@ -28,6 +30,8 @@ pub enum Type<M, V> {
 }
 
 impl<M, V> Type<M, V> {
+    /// The Boolean primitive type.
+    pub const BOOL: Self = Type::Prim(Prim::Bool);
     /// The integer primitive type.
     pub const INT: Self = Type::Prim(Prim::Int);
 }

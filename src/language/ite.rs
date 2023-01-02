@@ -64,10 +64,10 @@ impl<M: Default, B, C> Ite<M, B, C> {
     /// ```
     /// use starling::language::{tagged::Tagged, ite::Ite};
     ///
-    /// let i = Ite::deterministic("yes", 42, "no");
+    /// let i: Ite<(), _, _> = Ite::deterministic("yes", 42, "no");
     ///
-    /// assert_eq!(Some(&"yes"), i.eval(|x| Some(*x == 42)).map(|x| x.item));
-    /// assert_eq!(Some(&"no"), i.eval(|x| Some(*x == 100)).map(|x| x.item));
+    /// assert_eq!(Some(&"yes"), i.eval(|x| Some(*x == 42)));
+    /// assert_eq!(Some(&"no"), i.eval(|x| Some(*x == 100)));
     /// assert_eq!(None, i.eval(|_| None));
     /// ```
     ///
@@ -76,7 +76,7 @@ impl<M: Default, B, C> Ite<M, B, C> {
     /// ```
     /// use starling::language::ite::Ite;
     ///
-    /// let i = Ite::nondeterministic("yes", "no");
+    /// let i: Ite<(), _, i64> = Ite::nondeterministic("yes", "no");
     ///
     /// assert_eq!(None, i.eval(|x| Some(*x == 42)));
     /// assert_eq!(None, i.eval(|x| Some(*x == 100)));
@@ -98,7 +98,7 @@ impl<M: Default, B, C> Ite<M, B, C> {
     /// ```
     /// use starling::language::ite::Ite;
     ///
-    /// let i = Ite::deterministic("yes", 42, "no");
+    /// let i : Ite<(), _, _> = Ite::deterministic("yes", 42, "no");
     ///
     /// assert_eq!(&"yes", i.branch(true));
     /// assert_eq!(&"no", i.branch(false));
@@ -119,8 +119,8 @@ impl<M: Default, B, C> Ite<M, B, C> {
     /// ```
     /// use starling::language::ite::Ite;
     ///
-    /// let mut i = Ite::deterministic("yes", 42, "no");
-    /// *i.branch_mut(true).item = "ja";
+    /// let mut i : Ite<(), _, _> = Ite::deterministic("yes", 42, "no");
+    /// *i.branch_mut(true) = "ja";
     ///
     /// assert_eq!(&"ja", i.branch(true));
     /// assert_eq!(&"no", i.branch(false));

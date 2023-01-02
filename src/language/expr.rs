@@ -3,21 +3,21 @@
 use std::fmt::{Display, Formatter};
 
 pub use bop::Bop;
-pub use literal::Literal;
+pub use constant::Constant;
 pub use uop::Uop;
 
 use super::tagged;
 
 pub mod bop;
+pub mod constant;
 mod egg;
-pub mod literal;
 pub mod uop;
 
 /// The body of an expression, parameterised over tags and variables.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Expr<M, V> {
     /// Literal expression.
-    Literal(tagged::Tagged<M, Literal>),
+    Literal(tagged::Tagged<M, Constant>),
     /// Variable reference.
     Var(tagged::Tagged<M, V>),
     /// Binary (infix) operation.
@@ -61,13 +61,13 @@ impl<M: Default, V> Expr<M, V> {
     /// Convenience constructor for a Boolean literal with no tag.
     #[must_use]
     pub fn bool(value: bool) -> Self {
-        Self::Literal(tagged::Tagged::with_default(Literal::Bool(value)))
+        Self::Literal(tagged::Tagged::with_default(Constant::Bool(value)))
     }
 
     /// Convenience constructor for an integer literal with no tag.
     #[must_use]
     pub fn i64(value: i64) -> Self {
-        Self::Literal(tagged::Tagged::with_default(Literal::Int(
+        Self::Literal(tagged::Tagged::with_default(Constant::Int(
             num_bigint::BigInt::from(value),
         )))
     }
