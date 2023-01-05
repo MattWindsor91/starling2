@@ -37,14 +37,19 @@ pub enum Arith {
     Add,
     /// Subtraction.
     Sub,
-    /// Normal division.
+    /// Integer division.
     Div,
     /// Multiplication.
     Mul,
-    /// Integer division.
-    IntDiv,
     /// Integer modulus.
     Modulus,
+}
+
+/// We can lift arithmetic binary operators into binary operators.
+impl From<Arith> for Bop {
+    fn from(value: Arith) -> Self {
+        Self::Arith(value)
+    }
 }
 
 /// Outputs a human-readable rendering of a binary arithmetic operator.
@@ -54,8 +59,7 @@ impl Display for Arith {
             Arith::Add => "+",
             Arith::Sub => "-",
             Arith::Mul => "*",
-            Arith::Div => "/",
-            Arith::IntDiv => "div",
+            Arith::Div => "div",
             Arith::Modulus => "mod",
         })
     }
@@ -75,6 +79,13 @@ pub enum Bool {
     Implies,
     /// If and only if.
     Iff,
+}
+
+/// We can lift arithmetic binary operators into binary operators.
+impl From<Bool> for Bop {
+    fn from(value: Bool) -> Self {
+        Self::Bool(value)
+    }
 }
 
 /// Outputs a human-readable rendering of a binary Boolean operator.
@@ -107,6 +118,13 @@ pub enum Rel {
     Greater,
     /// Greater than or equal to.
     GreaterEq,
+}
+
+/// We can lift relational binary operators into binary operators.
+impl From<Rel> for Bop {
+    fn from(value: Rel) -> Self {
+        Self::Rel(value)
+    }
 }
 
 /// Outputs a human-readable rendering of a binary relational operator.

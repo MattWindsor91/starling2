@@ -33,10 +33,10 @@ pub enum Expr<M, V> {
 impl<M, V> Expr<M, V> {
     /// Convenience constructor for a binary operation.
     #[must_use]
-    pub fn bop(lhs: impl Into<Box<Self>>, op: Bop, rhs: impl Into<Box<Self>>) -> Self {
+    pub fn bop(lhs: impl Into<Box<Self>>, op: impl Into<Bop>, rhs: impl Into<Box<Self>>) -> Self {
         Self::Bop {
             lhs: lhs.into(),
-            op,
+            op: op.into(),
             rhs: rhs.into(),
         }
     }

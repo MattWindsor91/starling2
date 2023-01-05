@@ -3,10 +3,14 @@
 // nb: Some of the egg rewrites are taken from the egg test code, which is subject to the (MIT)
 // licence of egg.  See https://github.com/egraphs-good/egg/blob/main/tests/math.rs
 
-use super::Constant;
 use egg::{rewrite as rw, DidMerge, Id, Language, Symbol};
 use num_bigint::BigInt;
 use once_cell::sync::OnceCell;
+
+use super::Constant;
+
+mod decode;
+mod encode;
 
 egg::define_language! {
     /// The egg language for PVC expressions.
@@ -35,9 +39,9 @@ egg::define_language! {
         // Postfix operations
         "^" = Deref(Id),
         "not" = Not(Id),
-        // Literals
-        Literal(super::constant::Constant),
-        Symbol(Symbol),
+        // Terminals
+        Constant(super::constant::Constant),
+        Var(Symbol),
     }
 }
 
@@ -92,7 +96,35 @@ fn init() -> Vec<Rewrite> {
     ]
 }
 
+/// Converts an expression to its e-graph form.
+impl<M, V: Clone + Into<Symbol>> From<&super::Expr<M, V>> for Expr {
+    fn from(value: &super::Expr<M, V>) -> Self {
+        let mut result = Expr::default();
+        let _ = encode::expr(&mut result, value);
+        result
+    }
+}
+
+/// Converts an expression from its e-graph form.
+///
+/// This assumes that the last node in the e-graph rec-expr is the top of the expression.
+impl From<&Expr> for decode::Expr {
+    fn from(e: &Expr) -> Self {
+        let top_id = Id::from(e.as_ref().len() - 1);
+        decode::expr(e, top_id)
+    }
+}
+
+/// Performs optimising rewrites on an expression by turning it into an e-graph.
+#[must_use]
+pub fn simp(expr: &decode::Expr) -> decode::Expr {
+    let egg_in = expr.into();
+    let egg_out = simp_egraph(&egg_in);
+    (&egg_out).into()
+}
+
 /// Performs optimising rewrites on an e-graph.
+#[must_use]
 pub fn simp_egraph(expr: &Expr) -> Expr {
     let rules = RULES.get_or_init(init);
 
@@ -115,7 +147,7 @@ impl egg::Analysis<Term> for ConstantFolding {
     fn make(egraph: &EGraph, enode: &Term) -> Self::Data {
         let x = |i: &Id| egraph[*i].data.as_ref().map(|d| d.0.clone());
         Some(match enode {
-            Term::Literal(c) => (c.clone(), format!("{c}").parse().unwrap()),
+            Term::Constant(c) => (c.clone(), format!("{c}").parse().unwrap()),
             Term::Add([a, b]) => fold_op(|a: BigInt, b| a + b, "+", x(a)?, x(b)?)?,
             Term::Sub([a, b]) => fold_op(|a: BigInt, b| a - b, "-", x(a)?, x(b)?)?,
             Term::Mul([a, b]) => fold_op(|a: BigInt, b| a * b, "*", x(a)?, x(b)?)?,
@@ -146,7 +178,7 @@ impl egg::Analysis<Term> for ConstantFolding {
                     "constant_fold".to_string(),
                 );
             } else {
-                let added = egraph.add(Term::Literal(c));
+                let added = egraph.add(Term::Constant(c));
                 egraph.union(id, added);
             }
             // to not prune, comment this out
@@ -203,6 +235,35 @@ mod test {
         simple_boolean,
         init(),
         "(not (and (> (+ 1 1) 3) (implies (> 3 2) (>= 3 2))))" => "true"
+    }
+
+    /// Tests that the simplification in `simple_boolean` holds when we convert an expression to and
+    /// from egg.
+    #[test]
+    fn simple_boolean_transcode() {
+        use super::super::{
+            bop::{Arith, Bool, Rel},
+            Expr, Uop,
+        };
+
+        let expr: Expr<(), Symbol> = Expr::uop(
+            Uop::Not,
+            Expr::bop(
+                Expr::bop(
+                    Expr::bop(Expr::i64(1), Arith::Add, Expr::i64(1)),
+                    Rel::Greater,
+                    Expr::i64(3),
+                ),
+                Bool::And,
+                Expr::bop(
+                    Expr::bop(Expr::i64(3), Rel::Greater, Expr::i64(2)),
+                    Bool::Implies,
+                    Expr::bop(Expr::i64(3), Rel::GreaterEq, Expr::i64(2)),
+                ),
+            ),
+        );
+
+        assert_eq!(Expr::bool(true), simp(&expr));
     }
 
     egg::test_fn! {
