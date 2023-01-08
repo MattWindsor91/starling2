@@ -57,16 +57,11 @@ fn init() -> Vec<Rewrite> {
         rw!("add-0"; "(+ ?x 0)" => "?x"),
         rw!("sub-0"; "(- ?x 0)" => "?x"),
         rw!("mul-1"; "(* ?x 1)" => "?x"),
-        rw!("or-false"; "(or ?x false)" => "?x"),
-        rw!("and-true"; "(and ?x true)" => "?x"),
         // Zeroes
         rw!("mul-0"; "(* ?x 0)" => "0"),
-        rw!("or-true"; "(or ?x true)" => "true"),
-        rw!("and-false"; "(and ?x false)" => "false"),
         // Symmetry on equalities
         rw!("gt-lt"; "(> ?x ?y)" => "(< ?y ?x)"),
         rw!("ge-le"; "(>= ?x ?y)" => "(<= ?y ?x)"),
-        rw!("eq-sym"; "(= ?x ?y)" => "(= ?y ?x)"),
         rw!("neq-sym"; "(<> ?x ?y)" => "(<> ?y ?x)"),
         // Reflexivity
         //
@@ -74,7 +69,6 @@ fn init() -> Vec<Rewrite> {
         rw!("sub-reflexive"; "(- ?x ?x)" => "0"),
         rw!("div-reflexive"; "(div ?x ?x)" => "1" if is_not_zero("?x")),
         rw!("mod-reflexive"; "(mod ?x ?x)" => "0"),
-        rw!("eq-reflexive"; "(= ?x ?x)" => "true"),
         rw!("leq-reflexive"; "(<= ?x ?x)" => "true"),
         rw!("neq-reflexive"; "(<> ?x ?x)" => "false"),
         rw!("lt-reflexive"; "(< ?x ?x)" => "false"),
@@ -85,14 +79,63 @@ fn init() -> Vec<Rewrite> {
         rw!("plus-intro"; "?x" => "(+ ?x)"),
         rw!("minus-eliminate"; "(- ?x)" => "(* ?x -1)"),
         rw!("plus-eliminate"; "(+ ?x)" => "?x"),
+        //
+        // Equality
+        //
+        // We assume that there has been appropriate type checking to show that the terms are of the
+        // appropriate type.
+        //
+        rw!("eq-reflexive"; "(= ?x ?x)" => "true"),
+        rw!("eq-symmetric"; "(= ?x ?y)" => "(= ?y ?x)"),
+        rw!("eq-transitive"; "(and (= ?x ?y) (= ?y ?z))" => "(= ?x ?z)"),
+        rw!("eq-not"; "(= ?x (not ?y))" => "(<> ?x ?y)"),
+        //
+        // Equality against Boolean literals
+        //
+        //
+        rw!("eq-true"; "(= ?x true)" => "?x"),
+        rw!("eq-false"; "(= ?x false)" => "(not ?x)"),
+        //
+        // Disjunction
+        //
+        rw!("or-false"; "(or ?x false)" => "?x"),
+        rw!("or-reflexive"; "(or ?x ?x)" => "?x"),
+        rw!("or-true"; "(or ?x true)" => "true"),
+        rw!("or-commute"; "(or ?x ?y)" => "(or ?y ?x)"),
+        // Excluded middle
+        rw!("or-saturate"; "(or ?x (not ?x))" => "true"),
+        //
+        // Conjunction
+        //
+        rw!("and-true"; "(and ?x true)" => "?x"),
+        rw!("and-reflexive"; "(and ?x ?x)" => "?x"),
+        rw!("and-false"; "(and ?x false)" => "false"),
+        rw!("and-commute"; "(and ?x ?y)" => "(and ?y ?x)"),
+        rw!("and-saturate"; "(and ?x (not ?x))" => "false"),
+        //
         // Boolean negation
+        //
+
+        // Definition of not on Boolean literals:
         rw!("not-true"; "(not true)" => "false"),
         rw!("not-false"; "(not false)" => "true"),
+        // This is a classical logic, so we have the law of double negation:
+        rw!("not-not"; "(not (not ?x))" => "?x"),
+        //
         // de Morgan's laws
+        //
         rw!("de-morgan-and"; "(not (and ?x ?y))" => "(or (not ?x) (not ?y))"),
         rw!("de-morgan-or"; "(not (or ?x ?y))" => "(and (not ?x) (not ?y))"),
-        // Other Boolean simplifications
+        //
+        // Implication
+        //
         rw!("implies-definition"; "(implies ?x ?y)" => "(or (not ?x) ?y)"),
+        rw!("implies-reflexive"; "(implies ?x ?x)" => "true"),
+        rw!("implies-antisymmetric"; "(and (implies ?x ?y) (implies ?y ?x))" => "(= ?x ?y)"),
+        rw!("implies-transitive"; "(and (implies ?x ?y) (implies ?y ?z))" => "(implies ?x ?z)"),
+        // As we're in classical logic, IFF is basically a strongly typed version of equality;
+        // this rewrite rule makes that manifest.
+        rw!("iff-definition"; "(iff ?x ?y)" => "(= ?x ?y)"),
     ]
 }
 
@@ -270,5 +313,23 @@ mod test {
         simple_equality,
         init(),
         "(= (div (* 4 4) 8) (- 3 1))" => "true"
+    }
+
+    egg::test_fn! {
+        double_negate,
+        init(),
+        "(iff x (not (not x)))" => "true"
+    }
+
+    egg::test_fn! {
+        vacuous_implication,
+        init(),
+        "(implies x (not x))" => "(not x)"
+    }
+
+    egg::test_fn! {
+        impossible_boolean_equality,
+        init(),
+        "(= x (not x))" => "false"
     }
 }

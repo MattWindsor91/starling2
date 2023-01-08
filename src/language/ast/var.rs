@@ -35,11 +35,11 @@ pub type Identifier<'inp> = std::borrow::Cow<'inp, str>;
 
 /// Identifiers are variable references.
 impl<'inp> Variable for Identifier<'inp> {
-    fn into_symbol(self) -> Symbol {
+    fn to_symbol(&self) -> Symbol {
         Symbol::new(self)
     }
 
-    fn to_symbol(&self) -> Symbol {
+    fn into_symbol(self) -> Symbol {
         Symbol::new(self)
     }
 }
