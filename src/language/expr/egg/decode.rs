@@ -1,10 +1,11 @@
 //! Decode an egg rec-expr into a PVC expression.
 
+use egg::{Id, Symbol};
+
 use super::{
     super::{super::tagged::Tagged, bop, uop},
     Term,
 };
-use egg::{Id, Symbol};
 
 /// The decoder produces expressions with no metadata, and symbolic variables.
 pub type Expr = super::super::Expr<(), Symbol>;
@@ -38,16 +39,9 @@ pub fn expr(e: &super::Expr, top_id: Id) -> Expr {
 }
 
 fn binary_op(e: &super::Expr, op: impl Into<bop::Bop>, lhs: Id, rhs: Id) -> Expr {
-    Expr::Bop {
-        op: op.into(),
-        lhs: Box::new(expr(e, lhs)),
-        rhs: Box::new(expr(e, rhs)),
-    }
+    Expr::bop(expr(e, lhs), op.into(), expr(e, rhs))
 }
 
 fn unary_op(e: &super::Expr, op: uop::Uop, inner: Id) -> Expr {
-    Expr::Uop {
-        op: op.into(),
-        expr: Box::new(expr(e, inner)),
-    }
+    Expr::uop(op, expr(e, inner))
 }

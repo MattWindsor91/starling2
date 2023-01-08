@@ -1,13 +1,13 @@
 //! Programs, procedures, and declarations.
 
-use super::{super::tagged::Tagged, call::Prototype, constraint, stm, var, view, Identifier};
+use super::{super::tagged::Tagged, call::Prototype, constraint, stm, var, view};
 
 /// A program.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Program<'inp, M, V> {
     /// The name of the program.
-    pub name: Tagged<M, Identifier<'inp>>,
+    pub name: Tagged<M, var::Identifier<'inp>>,
     /// The declarations within the program.
     pub decls: Vec<Tagged<M, Decl<'inp, M, V>>>,
 }

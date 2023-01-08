@@ -8,7 +8,7 @@ pub use call::Call;
 pub use constraint::Constraint;
 pub use program::{Decl, Procedure, Program};
 pub use stm::{Stm, Triple};
-pub use variable::Identifier;
+pub use var::Identifier;
 
 pub mod call;
 pub mod constraint;
@@ -16,5 +16,4 @@ pub mod ite;
 pub mod program;
 pub mod stm;
 pub mod var;
-pub mod variable;
 pub mod view;

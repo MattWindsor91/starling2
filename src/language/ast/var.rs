@@ -1,6 +1,13 @@
 //! AST nodes for variables.
 
-use super::{super::{tagged::Tagged, var::Scope}, call::Parameter};
+use super::{
+    super::{
+        tagged::Tagged,
+        var::{Scope, Variable},
+    },
+    call::Parameter,
+};
+use egg::Symbol;
 
 /// A variable declaration.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -20,5 +27,19 @@ impl<'inp, M: Default, V> Default for Decl<'inp, M, V> {
             scope: Tagged::default(),
             vars: vec![],
         }
+    }
+}
+
+/// A string identifier.
+pub type Identifier<'inp> = std::borrow::Cow<'inp, str>;
+
+/// Identifiers are variable references.
+impl<'inp> Variable for Identifier<'inp> {
+    fn into_symbol(self) -> Symbol {
+        Symbol::new(self)
+    }
+
+    fn to_symbol(&self) -> Symbol {
+        Symbol::new(self)
     }
 }

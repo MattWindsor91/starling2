@@ -9,6 +9,12 @@ use std::{
 
 use clap::{Parser, Subcommand};
 
+use starling::language::{
+    ast::Identifier,
+    expr::map::{HasMeta, HasVars},
+    var::Variable,
+};
+
 /// Automated concurrent algorithm proof checker (second edition).
 #[derive(clap::Parser)]
 #[command(author, version, about, long_about = None)]
@@ -27,6 +33,11 @@ enum Commands {
         #[arg(required = true)]
         path: PathBuf,
     },
+    /// Simplifies a PVC expression.
+    ExprSimp {
+        #[arg(required = true)]
+        expr: String,
+    },
 }
 
 fn main() -> eyre::Result<()> {
@@ -35,6 +46,7 @@ fn main() -> eyre::Result<()> {
     let args = Cli::parse();
     let (cur_path, err) = match args.command {
         Commands::Lint { path } => (path.to_string_lossy().into_owned(), lint(&path)),
+        Commands::ExprSimp { expr } => (String::from("(none)"), simplify_expr(&expr)),
     };
 
     match err {
@@ -55,6 +67,16 @@ fn lint(path: impl AsRef<Path>) -> Result<()> {
 
     println!("{ast:#?}");
 
+    Ok(())
+}
+
+fn simplify_expr(input: &str) -> Result<()> {
+    let ast = starling::parser::expr(input)?;
+    let symbol_expr = ast.item.map_var(Identifier::into_symbol);
+    let no_meta_expr = symbol_expr.map_meta(|_| ());
+    let simpl_expr = starling::language::expr::egg::simp(&no_meta_expr);
+
+    println!("{simpl_expr}");
     Ok(())
 }
 

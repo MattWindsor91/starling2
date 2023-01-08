@@ -21,10 +21,35 @@ impl<M, T> Tagged<M, T> {
     /// Maps a function over the item of a tagged node.
     #[must_use]
     pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Tagged<M, U> {
-        Tagged {
-            meta: self.meta,
-            item: f(self.item),
-        }
+        Tagged::new(self.meta, f(self.item))
+    }
+
+    /// Tries to map a function over the item of a tagged node.
+    ///
+    /// # Errors
+    ///
+    /// Fails if `f` fails to map over the item.
+    pub fn try_map<U, E>(self, f: impl FnOnce(T) -> Result<U, E>) -> Result<Tagged<M, U>, E> {
+        Ok(Tagged::new(self.meta, f(self.item)?))
+    }
+
+    /// Maps a function `f` over the direct metadata of this tagged node.
+    ///
+    /// See `map_meta` in the `HasMeta` trait for recursive mapping.
+    pub fn map_direct_meta<N>(self, f: impl FnOnce(M) -> N) -> Tagged<N, T> {
+        Tagged::new(f(self.meta), self.item)
+    }
+
+    /// Maps a possibly error-prone function `f` over the direct metadata of this tagged node.
+    ///
+    /// # Errors
+    ///
+    /// Fails if `f` fails on the metadata.
+    pub fn try_map_direct_meta<N, E>(
+        self,
+        f: impl FnOnce(M) -> Result<N, E>,
+    ) -> Result<Tagged<N, T>, E> {
+        Ok(Tagged::new(f(self.meta)?, self.item))
     }
 }
 

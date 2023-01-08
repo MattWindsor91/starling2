@@ -7,6 +7,8 @@
 
 use pest::Parser;
 
+pub use expr::Expr;
+
 use super::language::{ast, tagged::Spanned};
 
 mod call;
@@ -33,6 +35,17 @@ pub fn parse(input: &str) -> Result<Spanned<program::Program>> {
     let pairs = Pvc::parse(Rule::program, input).map_err(Box::new)?;
     let pair = utils::one(pairs);
     Ok(utils::lift_many(pair, program::parse))
+}
+
+/// Parses a standalone expression.
+///
+/// # Errors
+///
+/// Fails if `input` could not be parsed correctly.
+pub fn expr(input: &str) -> Result<Spanned<Expr>> {
+    let pairs = Pvc::parse(Rule::expr, input).map_err(Box::new)?;
+    let pair = utils::one(pairs);
+    Ok(utils::lift_many(pair, expr::parse))
 }
 
 /// Errors returned by the Starling parser.

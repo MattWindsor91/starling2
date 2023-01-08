@@ -6,15 +6,12 @@ use pest::{
 };
 
 use super::{
-    super::language::{
-        ast::{var, Identifier},
-        var::Scope,
-    },
+    super::language::{ast::var, var::Scope},
     call, utils, Rule,
 };
 
 /// Shorthand for the type of decl returned by `decl`.
-pub type Decl<'inp> = var::Decl<'inp, Option<Span<'inp>>, Identifier<'inp>>;
+pub type Decl<'inp> = var::Decl<'inp, Option<Span<'inp>>, var::Identifier<'inp>>;
 
 /// Parses `pairs` as a variable declaration.
 #[must_use]

@@ -91,7 +91,7 @@ fn init() -> Vec<Rewrite> {
         // de Morgan's laws
         rw!("de-morgan-and"; "(not (and ?x ?y))" => "(or (not ?x) (not ?y))"),
         rw!("de-morgan-or"; "(not (or ?x ?y))" => "(and (not ?x) (not ?y))"),
-        // Other Boolean or
+        // Other Boolean simplifications
         rw!("implies-definition"; "(implies ?x ?y)" => "(or (not ?x) ?y)"),
     ]
 }

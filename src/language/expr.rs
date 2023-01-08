@@ -1,16 +1,20 @@
 //! Expressions in the high-level Starling language.
 
 use std::fmt::{Display, Formatter};
+use std::marker::PhantomData;
 
+use crate::language::expr::map::HasMeta;
 pub use bop::Bop;
 pub use constant::Constant;
+use map::HasVars;
 pub use uop::Uop;
 
-use super::tagged;
+use super::{tagged, var::Variable};
 
 pub mod bop;
 pub mod constant;
-mod egg;
+pub mod egg;
+pub mod map;
 pub mod uop;
 
 /// The body of an expression, parameterised over tags and variables.
@@ -84,6 +88,82 @@ impl<M, V: Display> Display for Expr<M, V> {
                 uop::Fixity::Prefix => write!(f, "{op}({expr})"),
                 uop::Fixity::Postfix => write!(f, "({expr}){op}"),
             },
+        }
+    }
+}
+
+impl<M, V: Variable> HasVars<V> for Expr<M, V> {
+    type Output<U> = Expr<M, U>;
+
+    fn try_map_var<U, E>(self, f: impl FnMut(V) -> Result<U, E>) -> Result<Self::Output<U>, E> {
+        VarMapper {
+            f,
+            v: PhantomData::default(),
+            e: PhantomData::default(),
+        }
+        .try_map(self)
+    }
+}
+
+/// Maps a closure over variables inside expressions, while retaining ownership over the closure.
+struct VarMapper<V, U, E, F: FnMut(V) -> Result<U, E>> {
+    f: F,
+    v: PhantomData<V>,
+    e: PhantomData<E>,
+}
+
+impl<V: Variable, U, E, F: FnMut(V) -> Result<U, E>> VarMapper<V, U, E, F> {
+    fn try_map<M>(&mut self, e: Expr<M, V>) -> Result<Expr<M, U>, E> {
+        match e {
+            Expr::Literal(l) => Ok(Expr::Literal(l)),
+            Expr::Var(v) => v.try_map_var(&mut self.f).map(Expr::Var),
+            Expr::Bop { op, lhs, rhs } => {
+                let lhs: Expr<M, U> = self.try_map(*lhs)?;
+                let rhs: Expr<M, U> = self.try_map(*rhs)?;
+                Ok(Expr::bop(lhs, op, rhs))
+            }
+            Expr::Uop { op, expr } => {
+                let expr: Expr<M, U> = self.try_map(*expr)?;
+                Ok(Expr::uop(op, expr))
+            }
+        }
+    }
+}
+
+impl<M, V> HasMeta<M> for Expr<M, V> {
+    type Output<N> = Expr<N, V>;
+
+    fn try_map_meta<N, E>(self, f: impl FnMut(M) -> Result<N, E>) -> Result<Self::Output<N>, E> {
+        MetaMapper {
+            f,
+            v: PhantomData::default(),
+            e: PhantomData::default(),
+        }
+        .try_map(self)
+    }
+}
+
+/// Maps a closure over metadata inside expressions, while retaining ownership over the closure.
+struct MetaMapper<M, N, E, F: FnMut(M) -> Result<N, E>> {
+    f: F,
+    v: PhantomData<M>,
+    e: PhantomData<E>,
+}
+
+impl<M, N, E, F: FnMut(M) -> Result<N, E>> MetaMapper<M, N, E, F> {
+    fn try_map<V>(&mut self, e: Expr<M, V>) -> Result<Expr<N, V>, E> {
+        match e {
+            Expr::Literal(l) => l.try_map_direct_meta(&mut self.f).map(Expr::Literal),
+            Expr::Var(v) => v.try_map_direct_meta(&mut self.f).map(Expr::Var),
+            Expr::Bop { op, lhs, rhs } => {
+                let lhs = self.try_map(*lhs)?;
+                let rhs = self.try_map(*rhs)?;
+                Ok(Expr::bop(lhs, op, rhs))
+            }
+            Expr::Uop { op, expr } => {
+                let expr = self.try_map(*expr)?;
+                Ok(Expr::uop(op, expr))
+            }
         }
     }
 }
