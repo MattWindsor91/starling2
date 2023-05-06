@@ -5,17 +5,47 @@ use std::collections::HashMap;
 use egg::Symbol;
 use pest::Span;
 
-use super::{typing, var};
+use super::typing;
+
+mod var;
 
 /// A full PVC program in control-flow graph form.
 ///
-/// This structure contains an entire
+/// This structure contains an entire program as a series of symbol tables.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Program<M> {
     /// Named types defined in this program.
     pub types: HashMap<Symbol, Type<M>>,
     /// Variables defined in this program.
-    pub variables: HashMap<Symbol, Var<M>>,
+    pub variables: var::Map<M>,
+}
+
+/// An unambiguous path to a particular block in a program.
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum BlockRef {
+    /// Not in a block, but rather in the global scope.
+    Global,
+    /// Local to the procedure with the given name, and indirect through the given block path.
+    Proc(Symbol, Vec<usize>),
+}
+
+impl BlockRef {
+    /// Gets the parent scope of the
+    pub fn parent(&self) -> Option<BlockRef> {
+        match self {
+            Self::Global => None,
+            Self::Proc(proc, blocks) => Some(proc_parent(proc, blocks)),
+        }
+    }
+}
+
+fn proc_parent(proc: &Symbol, blocks: &[usize]) -> BlockRef {
+    let mut blocks = blocks.to_vec();
+    if blocks.pop().is_some() {
+        BlockRef::Proc(*proc, blocks)
+    } else {
+        BlockRef::Global
+    }
 }
 
 /// A type record.
@@ -37,17 +67,6 @@ pub enum Origin<M> {
     Intrinsic,
     /// The element comes from user input.
     Script(M),
-}
-
-/// A variable record.
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Var<M> {
-    /// The origin of the variable.
-    pub origin: Origin<M>,
-    /// The scope of the variable.
-    pub scope: var::Scope,
-    /// The type of the variable, as an index into the typing table.
-    pub ty: Symbol,
 }
 
 #[derive(Debug, Clone, thiserror::Error, Eq, PartialEq)]
